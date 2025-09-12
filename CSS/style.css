@@ -1,9 +1,311 @@
+/* ============================= */
+/* BODY / FONDO         */
+/* ============================= */
 body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-
+    background-image: url("../images/background.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 }
-main {
-  flex: 1;
+
+/* ============================= */
+/* ENCABEZADO / NAVBAR   */
+/* ============================= */
+header .navbar {
+    background-color: #E00029;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+}
+
+/* Nueva clase para el header transparente */
+.header-transparente .navbar {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+header .navbar a {
+    color: #FFFFFF;
+}
+
+header .navbar a:hover {
+    color: #FFD700;
+}
+
+/* ============================= */
+/* BOTONES DE LA BARRA DE NAVEGACIÓN */
+/* ============================= */
+header .navbar a.btn-success,
+header .navbar button.btn-success {
+    background-color: #56B837;
+    border: none;
+    color: #fff;
+}
+
+header .navbar a.btn-success:hover,
+header .navbar button.btn-success:hover {
+    background-color: #479e2c;
+    color: #fff;
+}
+
+/* ============================= */
+/* NUEVOS ESTILOS DE TÍTULOS */
+/* ============================= */
+.main-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: #333333;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 0;
+    background-color: transparent; /* No tiene fondo */
+    box-shadow: none; /* No tiene sombra */
+}
+
+/* ============================= */
+/* SECCIÓN CONTACTO         */
+/* ============================= */
+.contacto-content {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.contacto-content h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.contacto-content .btn-success {
+    background-color: #2E8B57;
+    border: none;
+}
+
+.contacto-content .btn-success:hover {
+    background-color: #1f6b43;
+}
+
+/* ============================= */
+/* SECCIÓN BLOG           */
+/* ============================= */
+.blog-content {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+}
+
+.blog-content h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+.blog-content p {
+    font-family: 'Montserrat', sans-serif;
+    color: #333333;
+    line-height: 1.7;
+}
+
+/* ============================= */
+/* SECCIÓN CARRITO        */
+/* ============================= */
+.carrito-content {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+}
+
+.carrito-content h1 {
+    font-family: 'Playfair Display', serif;
+    color: #333333;
+    background-color: rgba(255, 255, 255, 0.6);
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.carrito-content p,
+.carrito-content td,
+.carrito-content th {
+    font-family: 'Montserrat', sans-serif;
+    color: #333333;
+    line-height: 1.7;
+}
+
+/* ============================= */
+/* SECCIÓN LOGIN          */
+/* ============================= */
+.login-content {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 450px;
+    margin: 40px auto;
+}
+
+.login-content h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+.login-content label,
+.login-content input,
+.login-content button {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* ============================= */
+/* SECCIÓN REGISTRO       */
+/* ============================= */
+.registro-content {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 520px;
+    margin: 40px auto;
+}
+
+.registro-content h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+.registro-content label,
+.registro-content input,
+.registro-content button {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* ============================= */
+/* SECCIÓN PERFIL         */
+/* ============================= */
+.perfil-content {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+.perfil-content h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+.perfil-content label,
+.perfil-content input,
+.perfil-content p {
+    font-family: 'Montserrat', sans-serif;
+    color: #333333;
+}
+
+.perfil-content button {
+    font-family: 'Montserrat', sans-serif;
+    color: #ffffff;
+}
+
+/* --- ESTILOS DE LA PÁGINA DE REPORTES --- */
+.container {
+    max-width: 1200px;
+}
+
+h1, h2, h3 {
+    font-weight: 700;
+    color: #28a745;
+}
+
+/* Tarjetas de Resumen y Productos */
+.card {
+    border: none;
+    border-radius: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    /* Agregado para darle opacidad al fondo de la tarjeta */
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.card-text.fs-2 {
+    font-weight: 700;
+}
+
+.bg-success { background-color: #28a745 !important; }
+.bg-primary { background-color: #007bff !important; }
+.bg-info { background-color: #17a2b8 !important; }
+.text-white { color: #fff !important; }
+
+/* Tablas de Reportes */
+.table {
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.table th {
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.btn {
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ============================= */
+/* BOTÓN DE ADMINISTRADOR */
+/* ============================= */
+.navbar .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.navbar .btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+}
+/* ============================= */
+/* BOTÓN CERRAR SESIÓN           */
+/* ============================= */
+.navbar .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+.navbar .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
 }
