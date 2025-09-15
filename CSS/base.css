@@ -1,0 +1,15 @@
+/* ============================= */
+/* BASE STYLES / BODY & FONTS    */
+/* ============================= */
+body {
+    background-image: url("../images/background.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Puedes añadir estilos de fuentes o variables CSS aquí */
+.main-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+}

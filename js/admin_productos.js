@@ -6,9 +6,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnCancelar = document.getElementById('btnCancelar');
     const productoIdInput = document.getElementById('productoId');
 
-    // Carga los productos. Intenta obtenerlos de localStorage primero.
-    // Si no existen en localStorage, usa el array de 'productos.js' como base.
-    let productos = JSON.parse(localStorage.getItem('productos')) || window.productos || [];
+    // Inicializa los productos en localStorage si no existen
+    // Esto asegura que la lista de productos esté disponible.
+    if (typeof initProductos !== 'undefined') {
+        initProductos(window.productos);
+    }
+
+    // Carga los productos. Ahora, siempre se obtendrán de localStorage.
+    let productos = JSON.parse(localStorage.getItem('productos')) || [];
 
     // --- FUNCIONES DE GESTIÓN ---
 

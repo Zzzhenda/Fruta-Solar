@@ -61,6 +61,8 @@
 </header>
 
   <main>
+
+
     <section class="position-relative">
       <img src="../images/hero_frutillas.jpg" class="img-fluid w-100" alt="Frutas frescas" style="height:650px; object-fit:cover;">
       <div class="position-absolute top-50 start-50 translate-middle text-center text-white p-3" style="background:rgba(0,0,0,0.35); border-radius:10px;">
@@ -71,46 +73,37 @@
     </section>
 
     <section class="container my-5">
-      <h2  class=" productos-title text-center mb-4" style="font-family:'Playfair Display', serif;">Nuestros Productos</h2>
-      <div class="row row-cols-1 row-cols-md-3 g-4">
-        
-        <div class="col">
-          <div class="card h-100 text-center">
-            <img src="../images/manzana.png" class="card-img-top" alt="Manzanas Fuji">
+      <div class="row text-center">
+        <div class="col-md-4 mb-4">
+          <div class="card h-75 border-0 shadow-sm">
+            <img src="../images/calidad.jpg" class="card-img-top" alt="Calidad">
             <div class="card-body">
-              <h5 class="card-title">Manzanas Fuji</h5>
-              <p class="card-text">$1,200 CLP / kilo</p>
-              <button class="btn btn-success agregar-carrito" data-id="FR001">Agregar al carrito</button>
+              <h5 class="card-title">Calidad Superior</h5>
+              <p class="card-text">Productos frescos y naturales, cultivados con amor y dedicación.</p>
             </div>
-          </div>
+          </div>    
         </div>
-        
-        <div class="col">
-          <div class="card h-100 text-center">
-            <img src="../images/Naranja.png" class="card-img-top" alt="Naranjas Valencia">
+        <div class="col-md-4 mb-4">
+          <div class="card h-75 border-0 shadow-sm">
+            <img src="https://www.foronuclear.org/wp-content/uploads/2018/06/nubes.jpg" class="card-img-top" alt="Sostenibilidad">
             <div class="card-body">
-              <h5 class="card-title">Naranjas Valencia</h5>
-              <p class="card-text">$1,000 CLP / kilo</p>
-              <button class="btn btn-success agregar-carrito" data-id="FR002">Agregar al carrito</button>
+              <h5 class="card-title">Sostenibilidad</h5>
+              <p class="card-text">Comprometidos con prácticas agrícolas responsables y el cuidado del medio ambiente.</p>
             </div>
-          </div>
+          </div>    
         </div>
-        
-        <div class="col">
-          <div class="card h-100 text-center">
-            <img src="../images/Platano.png" class="card-img-top" alt="Plátanos Cavendish">
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <img src="../images/comunidad.jpg" class="card-img-top" alt="Comunidad"  height="400">
             <div class="card-body">
-              <h5 class="card-title">Plátanos Cavendish</h5>
-              <p class="card-text">$800 CLP / kilo</p>
-              <button class="btn btn-success agregar-carrito" data-id="FR003">Agregar al carrito</button>
+              <h5 class="card-title">Apoyo a la Comunidad</h5>
+              <p class="card-text">Trabajamos con agricultores locales para fortalecer la economía regional.</p>
             </div>
-          </div>
+          </div>    
         </div>
-        
       </div>
     </section>
 
-    
   </main>
 
 <footer class="bg-dark text-white text-center py-3 mt-5">
@@ -123,77 +116,7 @@
 <script src="../js/productos.js"></script>
 
 
-<script>
-  // Inicializa el localStorage con los productos si no existe la clave 'productos'
-  // Esto asegura que la lógica de stock funcione correctamente.
-  if (!localStorage.getItem('productos')) {
-    localStorage.setItem('productos', JSON.stringify(productos));
-  }
-  
-  document.addEventListener("DOMContentLoaded", () => {
-    const botonesAgregar = document.querySelectorAll('.agregar-carrito');
 
-    botonesAgregar.forEach(boton => {
-      boton.addEventListener('click', () => {
-        const productoId = boton.dataset.id;
-        const producto = productos.find(p => p.id === productoId);
-        
-        if (!producto) {
-            console.error('Producto no encontrado en el array de productos.');
-            return;
-        }
-
-        const tienda = getDatosTienda();
-        if (tienda.usuarioActual) {
-          const usuario = tienda.usuarios.find(u => u.correo === tienda.usuarioActual);
-          let carrito = usuario.carrito || [];
-          
-          const productoExistente = carrito.find(p => p.id === producto.id);
-          if (productoExistente) {
-            if (productoExistente.cantidad < producto.stock) {
-               productoExistente.cantidad++;
-            } else {
-               alert("No puedes agregar más de este producto, ¡has alcanzado el stock máximo!");
-               return;
-            }
-          } else {
-            if (producto.stock > 0) {
-                carrito.push({ ...producto, cantidad: 1 });
-            } else {
-                alert("¡Producto agotado!");
-                return;
-            }
-          }
-          usuario.carrito = carrito;
-          localStorage.setItem('miTienda', JSON.stringify(tienda));
-          alert(`${producto.nombre} se agregó a tu carrito.`);
-
-        } else {
-          let carrito = JSON.parse(localStorage.getItem('carritoInvitado')) || [];
-          const productoExistente = carrito.find(p => p.id === producto.id);
-
-          if (productoExistente) {
-            if (productoExistente.cantidad < producto.stock) {
-               productoExistente.cantidad++;
-            } else {
-               alert("No puedes agregar más de este producto, ¡has alcanzado el stock máximo!");
-               return;
-            }
-          } else {
-            if (producto.stock > 0) {
-               carrito.push({ ...producto, cantidad: 1 });
-            } else {
-               alert("¡Producto agotado!");
-               return;
-            }
-          }
-          localStorage.setItem('carritoInvitado', JSON.stringify(carrito));
-          alert(`${producto.nombre} se agregó al carrito.`);
-        }
-      });
-    });
-  });
-</script>
 
 <script src="../js/ui.js"></script>
 </body>

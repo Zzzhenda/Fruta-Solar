@@ -1,0 +1,24 @@
+/* ============================= */
+/* LAYOUT / HEADER & FOOTER      */
+/* ============================= */
+header .navbar {
+    background-color: #E00029;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+}
+
+.header-transparente .navbar {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+header .navbar a {
+    color: #FFFFFF;
+}
+
+header .navbar a:hover {
+    color: #FFD700;
+}
+
+footer {
+    /* Estilos para el pie de página si los tuvieras */
+}

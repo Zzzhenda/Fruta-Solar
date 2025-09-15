@@ -1,55 +1,55 @@
 // perfil.js
 
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-const perfilDiv = document.getElementById('perfilUsuario');
+    const perfilDiv = document.getElementById('perfilUsuario');
 
-// Obtenemos la estructura completa de localStorage
+    // Obtenemos la estructura completa de localStorage
 
-const miTienda = JSON.parse(localStorage.getItem('miTienda')) || { usuarios: [], usuarioActual: null };
+    const miTienda = JSON.parse(localStorage.getItem('miTienda')) || { usuarios: [], usuarioActual: null };
 
-const correoUsuarioActual = miTienda.usuarioActual;
-
-
-if (!correoUsuarioActual) {
-
-// Si no hay correo de usuario actual, redirige a login.
-
-window.location.href = "login.html";
-
-return;
-
-}
+    const correoUsuarioActual = miTienda.usuarioActual;
 
 
-// Buscamos el objeto de usuario completo usando el correo
+    if (!correoUsuarioActual) {
 
-let usuario = miTienda.usuarios.find(u => u.correo === correoUsuarioActual);
+        // Si no hay correo de usuario actual, redirige a login.
 
+        window.location.href = "login.html";
 
-if (!usuario) {
+        return;
 
-// Manejar el caso donde el usuario no se encuentra
-
-console.error('Usuario no encontrado.');
-
-miTienda.usuarioActual = null;
-
-localStorage.setItem('miTienda', JSON.stringify(miTienda));
-
-window.location.href = "login.html";
-
-return;
-
-}
+    }
 
 
-function mostrarPerfil(editando = false) {
+    // Buscamos el objeto de usuario completo usando el correo
 
-if (!editando) {
+    let usuario = miTienda.usuarios.find(u => u.correo === correoUsuarioActual);
 
-perfilDiv.innerHTML = `
+
+    if (!usuario) {
+
+        // Manejar el caso donde el usuario no se encuentra
+
+        console.error('Usuario no encontrado.');
+
+        miTienda.usuarioActual = null;
+
+        localStorage.setItem('miTienda', JSON.stringify(miTienda));
+
+        window.location.href = "login.html";
+
+        return;
+
+    }
+
+
+    function mostrarPerfil(editando = false) {
+
+        if (!editando) {
+
+            perfilDiv.innerHTML = `
 
 <div class="card">
 
@@ -71,11 +71,11 @@ perfilDiv.innerHTML = `
 
 `;
 
-document.getElementById('editarPerfil').addEventListener('click', () => mostrarPerfil(true));
+            document.getElementById('editarPerfil').addEventListener('click', () => mostrarPerfil(true));
 
-} else {
+        } else {
 
-perfilDiv.innerHTML = `
+            perfilDiv.innerHTML = `
 
 <div class="card">
 
@@ -119,53 +119,53 @@ perfilDiv.innerHTML = `
 
 `;
 
-document.getElementById('cancelarEdicion').addEventListener('click', () => mostrarPerfil(false));
+            document.getElementById('cancelarEdicion').addEventListener('click', () => mostrarPerfil(false));
 
-document.getElementById('formEditarPerfil').addEventListener('submit', function(e) {
+            document.getElementById('formEditarPerfil').addEventListener('submit', function (e) {
 
-e.preventDefault();
+                e.preventDefault();
 
-// Actualizar los datos del usuario logueado en la variable local
+                // Actualizar los datos del usuario logueado en la variable local
 
-usuario.nombre = document.getElementById('editNombre').value.trim();
+                usuario.nombre = document.getElementById('editNombre').value.trim();
 
-usuario.telefono = document.getElementById('editTelefono').value.trim();
+                usuario.telefono = document.getElementById('editTelefono').value.trim();
 
-usuario.direccion = document.getElementById('editDireccion').value.trim();
-
-
-// Actualizar en el arreglo de usuarios principal en localStorage
-
-const idx = miTienda.usuarios.findIndex(u => u.correo === usuario.correo);
-
-if (idx !== -1) {
-
-miTienda.usuarios[idx] = usuario;
-
-}
+                usuario.direccion = document.getElementById('editDireccion').value.trim();
 
 
-// Guardar la estructura completa de vuelta en localStorage
+                // Actualizar en el arreglo de usuarios principal en localStorage
 
-localStorage.setItem('miTienda', JSON.stringify(miTienda));
+                const idx = miTienda.usuarios.findIndex(u => u.correo === usuario.correo);
 
-mostrarPerfil(false);
+                if (idx !== -1) {
 
-});
+                    miTienda.usuarios[idx] = usuario;
 
-}
-
-}
+                }
 
 
-mostrarPerfil(false);
+                // Guardar la estructura completa de vuelta en localStorage
 
-// Agregamos el event listener para el nuevo botón de cierre de sesión
+                localStorage.setItem('miTienda', JSON.stringify(miTienda));
 
-document.getElementById('cerrarSesionBtn').addEventListener('click', function() {
+                mostrarPerfil(false);
 
-logout(); // Llama a la función de ui.js para cerrar sesión
+            });
 
-});
+        }
+
+    }
+
+
+    mostrarPerfil(false);
+
+    // Agregamos el event listener para el nuevo botón de cierre de sesión
+
+    document.getElementById('cerrarSesionBtn').addEventListener('click', function () {
+
+        logout(); // Llama a la función de ui.js para cerrar sesión
+
+    });
 
 });

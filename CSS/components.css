@@ -1,0 +1,55 @@
+/* ============================= */
+/* COMPONENTS / FORMS, BUTTONS, CARDS */
+/* ============================= */
+
+/* Estilos de botones de la barra de navegación */
+header .navbar a.btn-success,
+header .navbar button.btn-success {
+    background-color: #56B837;
+    border: none;
+    color: #fff;
+}
+
+header .navbar a.btn-success:hover,
+header .navbar button.btn-success:hover {
+    background-color: #479e2c;
+    color: #fff;
+}
+
+/* Estilos generales de botones */
+.btn {
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.bg-success { background-color: #28a745 !important; }
+.bg-primary { background-color: #007bff !important; }
+.bg-info { background-color: #17a2b8 !important; }
+.text-white { color: #fff !important; }
+
+/* Estilos para formularios */
+.form-container {
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para tarjetas de productos */
+.card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}

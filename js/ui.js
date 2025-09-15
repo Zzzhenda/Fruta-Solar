@@ -18,7 +18,7 @@ function updateNavbar() {
             <li class="nav-item me-3"><a class="nav-link btn btn-success text-white" href="perfil.html">Mi Perfil</a></li>
         `;
         
-        // **NUEVO:** Verifica si el usuario es un administrador para mostrar el botón de panel
+        //  Verifica si el usuario es un administrador para mostrar el botón de panel
         if (usuario.rol === 'administrador') {
             navHtml += `<li class="nav-item me-3"><a class="nav-link btn btn-warning text-white" href="admin.html">Panel de Admin</a></li>`;
         }

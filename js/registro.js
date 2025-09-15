@@ -30,7 +30,7 @@ document.getElementById('formRegistro').addEventListener('submit', function (e) 
         correo,
         telefono,
         direccion,
-        password,  // <-- unificado
+        password,  
         rol: "cliente",
         carrito: [],
         pedidos: []
