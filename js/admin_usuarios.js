@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
     correo,
     telefono: document.getElementById('nuevoTelefono').value.trim(),
     direccion: document.getElementById('nuevoDireccion').value.trim(),
-    contraseña: document.getElementById('nuevoPassword').value, // <--- La corrección está aquí
+    password: document.getElementById('nuevoPassword').value, 
     rol: document.getElementById('nuevoRol').value
 };
       miTienda.usuarios.push(nuevoUsuario);
