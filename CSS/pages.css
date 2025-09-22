@@ -1,0 +1,62 @@
+/* ============================= */
+/* PAGE SPECIFIC STYLES          */
+/* ============================= */
+
+/* Estilos para Títulos (H1, H2) */
+.catalogo-title,
+.main-title,
+h1 {
+    font-family: 'Playfair Display', serif;
+    color: #4CAF50; /* Verde vibrante para los títulos */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Sombra para mejor lectura */
+    font-weight: 700;
+}
+
+/* Estilos de secciones en páginas */
+.seccion-impacto,
+.seccion-catalogo {
+    background-color: rgba(24, 24, 24, 0.85); /* Fondo oscuro semitransparente */
+    color: #f8f9fa; /* Color de texto claro */
+    padding: 3rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Sombra más pronunciada */
+    margin-bottom: 2rem;
+}
+
+/* Estilos específicos para la página de Contacto */
+.contacto-info .card {
+    background-color: #343a40; /* Card de fondo oscuro */
+    color: #e9ecef;
+    border: 1px solid #4CAF50; /* Borde verde para destacar */
+}
+
+.contacto-info .card-title {
+    color: #4CAF50;
+    font-weight: 700;
+}
+
+/* Estilos específicos para los formularios de Registro y Login */
+.form-container {
+    background-color: rgba(24, 24, 24, 0.9); /* Fondo más oscuro y opaco para formularios */
+    color: #f8f9fa;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+}
+
+.form-container .form-label {
+    color: #a5d6a7; /* Verde claro para las etiquetas */
+}
+
+/* Estilos para el Perfil de Usuario */
+.perfil-content .card,
+.admin-pedidos .card {
+    background-color: rgba(52, 58, 64, 0.85); /* Fondo oscuro para las tarjetas de contenido */
+    color: #e9ecef;
+    border: none;
+}
+
+.perfil-content .card-title,
+.admin-pedidos .card-header {
+    color: #4CAF50; /* Verde para títulos de tarjetas */
+}
