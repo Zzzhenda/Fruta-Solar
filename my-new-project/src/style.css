@@ -1,0 +1,323 @@
+/* ============================= */
+
+/* PAGE SPECIFIC / ADMIN */
+
+/* ============================= */
+
+.table {
+
+    border-radius: 1rem;
+
+    overflow: hidden;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+}
+
+
+.table th {
+
+    background-color: #e9ecef;
+
+    color: #495057;
+
+    font-weight: 600;
+
+}
+
+
+.table td {
+
+    vertical-align: middle;
+
+}
+
+
+.table-striped tbody tr:nth-of-type(odd) {
+
+    background-color: rgba(0, 0, 0, 0.03);
+
+}/* ============================= */
+
+/* BASE STYLES / BODY & FONTS    */
+
+/* ============================= */
+
+body {
+
+    background-image: url("/images/background.jpg");
+
+    background-size: cover;
+
+    background-repeat: no-repeat;
+
+    background-position: center;
+
+}
+
+
+/* Puedes añadir estilos de fuentes o variables CSS aquí */
+
+.main-title {
+
+    font-family: 'Playfair Display', serif;
+
+    font-weight: 700;
+
+}/* ============================= */
+
+/* COMPONENTS / FORMS, BUTTONS, CARDS */
+
+/* ============================= */
+
+
+/* Estilos de botones de la barra de navegación */
+
+header .navbar a.btn-success,
+
+header .navbar button.btn-success {
+
+    background-color: #56B837;
+
+    border: none;
+
+    color: #fff;
+
+}
+
+
+header .navbar a.btn-success:hover,
+
+header .navbar button.btn-success:hover {
+
+    background-color: #479e2c;
+
+    color: #fff;
+
+}
+
+
+/* Estilos generales de botones */
+
+.btn {
+
+    font-weight: 500;
+
+    border-radius: 0.5rem;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+}
+
+
+.btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+}
+
+
+.bg-success { background-color: #28a745 !important; }
+
+.bg-primary { background-color: #007bff !important; }
+
+.bg-info { background-color: #17a2b8 !important; }
+
+.text-white { color: #fff !important; }
+
+
+/* Estilos para formularios */
+
+.form-container {
+
+    padding: 2rem;
+
+    border-radius: 1rem;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+}
+
+
+/* Estilos para tarjetas de productos */
+
+.card {
+
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
+    border-radius: 1rem;
+
+    overflow: hidden;
+
+    border: none;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+}
+
+
+.card:hover {
+
+    transform: translateY(-5px);
+
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+}/* ============================= */
+
+/* LAYOUT / HEADER & FOOTER      */
+
+/* ============================= */
+
+header .navbar {
+
+    background-color: #E00029;
+
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    padding: 10px 0;
+
+}
+
+
+.header-transparente .navbar {
+
+    background-color: rgba(0, 0, 0, 0);
+
+}
+
+
+header .navbar a {
+
+    color: #FFFFFF;
+
+}
+
+
+header .navbar a:hover {
+
+    color: #FFD700;
+
+}
+
+
+footer {
+
+    /* Estilos para el pie de página si los tuvieras */
+
+}/* ============================= */
+
+/* PAGE SPECIFIC STYLES          */
+
+/* ============================= */
+
+
+/* Estilos para Títulos (H1, H2) */
+
+.catalogo-title,
+
+.main-title,
+
+h1 {
+
+    font-family: 'Playfair Display', serif;
+
+    color: #4CAF50; /* Verde vibrante para los títulos */
+
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Sombra para mejor lectura */
+
+    font-weight: 700;
+
+}
+
+
+/* Estilos de secciones en páginas */
+
+.seccion-impacto,
+
+.seccion-catalogo {
+
+    background-color: rgba(24, 24, 24, 0.85); /* Fondo oscuro semitransparente */
+
+    color: #f8f9fa; /* Color de texto claro */
+
+    padding: 3rem;
+
+    border-radius: 1rem;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Sombra más pronunciada */
+
+    margin-bottom: 2rem;
+
+}
+
+
+/* Estilos específicos para la página de Contacto */
+
+.contacto-info .card {
+
+    background-color: #343a40; /* Card de fondo oscuro */
+
+    color: #e9ecef;
+
+    border: 1px solid #4CAF50; /* Borde verde para destacar */
+
+}
+
+
+.contacto-info .card-title {
+
+    color: #4CAF50;
+
+    font-weight: 700;
+
+}
+
+
+/* Estilos específicos para los formularios de Registro y Login */
+
+.form-container {
+
+    background-color: rgba(24, 24, 24, 0.9); /* Fondo más oscuro y opaco para formularios */
+
+    color: #f8f9fa;
+
+    padding: 2.5rem;
+
+    border-radius: 1rem;
+
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+
+}
+
+
+.form-container .form-label {
+
+    color: #a5d6a7; /* Verde claro background-image: url("../images/background.jpg");  para las etiquetas */
+
+}
+
+
+/* Estilos para el Perfil de Usuario */
+
+.perfil-content .card,
+
+.admin-pedidos .card {
+
+    background-color: rgba(52, 58, 64, 0.85); /* Fondo oscuro para las tarjetas de contenido */
+
+    color: #e9ecef;
+
+    border: none;
+
+}
+
+
+.perfil-content .card-title,
+
+.admin-pedidos .card-header {
+
+    color: #4CAF50; /* Verde para títulos de tarjetas */
+
+}
