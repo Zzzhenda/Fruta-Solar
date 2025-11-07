@@ -31,7 +31,13 @@ interface AuthContextType {
   login: (correo: string, pass: string) => boolean;
   registro: (datos: Omit<Usuario, 'rol' | 'carrito' | 'pedidos'>) => boolean;
   logout: () => void;
-  agregarPedido: (nuevoPedido: Pedido) => void; // <--- NUEVA FUNCIÓN
+  agregarPedido: (nuevoPedido: Pedido) => void;
+  getAllPedidos: () => Array<Pedido & { clienteEmail: string; clienteNombre: string }>;
+  actualizarEstadoPedido: (pedidoId: number, nuevoEstado: string) => void;
+  // Nuevas funciones para gestión de usuarios
+  getAllUsuarios: () => Usuario[];
+  editarUsuario: (usuarioEditado: Usuario) => void;
+  eliminarUsuario: (correoAEliminar: string) => boolean;
 }
 
 const TIENDA_KEY = 'miTienda';
@@ -75,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (correo: string, pass: string) => {
     const tienda = getDatosTienda();
     const usuario = tienda.usuarios.find(u => u.correo === correo.toLowerCase() && u.password === pass);
-    
+
     if (!usuario) return false;
 
     const carritoInvitado: CarritoItem[] = JSON.parse(localStorage.getItem("carritoInvitado") || '[]');
@@ -92,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     tienda.usuarioActual = usuario.correo;
     const userIndex = tienda.usuarios.findIndex(u => u.correo === usuario.correo);
     tienda.usuarios[userIndex] = usuario;
-    
+
     setDatosTienda(tienda);
     setUsuarioActual(usuario);
     return true;
@@ -125,26 +131,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("carritoInvitado");
   };
 
-  // Función para agregar un pedido al historial
   const agregarPedido = (nuevoPedido: Pedido) => {
     if (!usuarioActual) return;
-
     const tienda = getDatosTienda();
     const userIndex = tienda.usuarios.findIndex(u => u.correo === usuarioActual.correo);
-    
+
     if (userIndex !== -1) {
-      // Inicializar array de pedidos si no existe
-      if (!tienda.usuarios[userIndex].pedidos) {
-         tienda.usuarios[userIndex].pedidos = [];
-      }
-      // Agregar pedido
+      if (!tienda.usuarios[userIndex].pedidos) tienda.usuarios[userIndex].pedidos = [];
       tienda.usuarios[userIndex].pedidos.push(nuevoPedido);
-      // Vaciar carrito en la BD
       tienda.usuarios[userIndex].carrito = [];
-      
       setDatosTienda(tienda);
-      
-      // Actualizar estado local
       setUsuarioActual({
         ...usuarioActual,
         pedidos: [...(usuarioActual.pedidos || []), nuevoPedido],
@@ -153,12 +149,87 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const getAllPedidos = () => {
+    const tienda = getDatosTienda();
+    const todosLosPedidos: Array<Pedido & { clienteEmail: string; clienteNombre: string }> = [];
+    tienda.usuarios.forEach(usuario => {
+      if (usuario.pedidos) {
+        usuario.pedidos.forEach(pedido => {
+          todosLosPedidos.push({ ...pedido, clienteEmail: usuario.correo, clienteNombre: usuario.nombre });
+        });
+      }
+    });
+    return todosLosPedidos.sort((a, b) => b.id - a.id);
+  };
+
+  const actualizarEstadoPedido = (pedidoId: number, nuevoEstado: string) => {
+    const tienda = getDatosTienda();
+    let pedidoEncontrado = false;
+    for (const usuario of tienda.usuarios) {
+      if (!usuario.pedidos) continue;
+      const pedidoIndex = usuario.pedidos.findIndex(p => p.id === pedidoId);
+      if (pedidoIndex !== -1) {
+        usuario.pedidos[pedidoIndex].estado = nuevoEstado;
+        pedidoEncontrado = true;
+        if (usuarioActual && usuario.correo === usuarioActual.correo) {
+             const pedidosActualizados = [...usuarioActual.pedidos];
+             const localIndex = pedidosActualizados.findIndex(p => p.id === pedidoId);
+             if (localIndex !== -1) {
+                 pedidosActualizados[localIndex] = { ...pedidosActualizados[localIndex], estado: nuevoEstado };
+                 setUsuarioActual({ ...usuarioActual, pedidos: pedidosActualizados });
+             }
+        }
+        break;
+      }
+    }
+    if (pedidoEncontrado) setDatosTienda(tienda);
+  };
+
+  // --- GESTIÓN DE USUARIOS (NUEVO) ---
+
+  const getAllUsuarios = () => {
+    return getDatosTienda().usuarios;
+  };
+
+  const editarUsuario = (usuarioEditado: Usuario) => {
+    const tienda = getDatosTienda();
+    const idx = tienda.usuarios.findIndex(u => u.correo === usuarioEditado.correo);
+    if (idx !== -1) {
+       // Mantenemos carrito y pedidos originales para no perderlos al editar datos básicos
+       tienda.usuarios[idx] = {
+         ...usuarioEditado,
+         carrito: tienda.usuarios[idx].carrito,
+         pedidos: tienda.usuarios[idx].pedidos
+       };
+       setDatosTienda(tienda);
+       // Si el admin se edita a sí mismo, actualizamos el estado local
+       if (usuarioActual && usuarioActual.correo === usuarioEditado.correo) {
+           setUsuarioActual(tienda.usuarios[idx]);
+       }
+    }
+  };
+
+  const eliminarUsuario = (correoAEliminar: string) => {
+    // Validación de seguridad: no permitir auto-eliminación
+    if (usuarioActual && usuarioActual.correo === correoAEliminar) {
+        alert("No puedes eliminar tu propia cuenta de administrador mientras estás logueado.");
+        return false;
+    }
+    const tienda = getDatosTienda();
+    const nuevosUsuarios = tienda.usuarios.filter(u => u.correo !== correoAEliminar);
+    
+    if (nuevosUsuarios.length < tienda.usuarios.length) {
+        tienda.usuarios = nuevosUsuarios;
+        setDatosTienda(tienda);
+        return true;
+    }
+    return false;
+  };
+
   const value = {
-    usuarioActual,
-    login,
-    registro,
-    logout,
-    agregarPedido
+    usuarioActual, login, registro, logout, agregarPedido,
+    getAllPedidos, actualizarEstadoPedido,
+    getAllUsuarios, editarUsuario, eliminarUsuario // <--- Exportamos las nuevas funciones
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -166,8 +237,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
-  }
+  if (context === undefined) throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   return context;
 }

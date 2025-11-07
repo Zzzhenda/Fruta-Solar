@@ -1,4 +1,4 @@
-// Este es el archivo que faltaba y causaba el error de compilación.
+
 
 // 1. Definimos el "tipo" de dato para un producto
 export interface Producto {

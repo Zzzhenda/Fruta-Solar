@@ -1,129 +1,115 @@
 // src/pages/Registro.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // 1. Importa el hook de Auth
+import { useAuth } from '../context/AuthContext';
 
 export function Registro() {
-  // Estados para cada input
-  const [nombre, setNombre] = useState('');
-  const [correo, setCorreo] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [password, setPassword] = useState('');
-  const [password2, setPassword2] = useState('');
-  const [mensaje, setMensaje] = useState('');
+  const [formData, setFormData] = useState({
+    nombre: '',
+    correo: '',
+    telefono: '',
+    direccion: '',
+    password: '',
+    password2: ''
+  });
+  const [alerta, setAlerta] = useState<{ tipo: 'success' | 'danger' | '', mensaje: string }>({ tipo: '', mensaje: '' });
 
-  const { registro } = useAuth(); // 2. Obtiene la función de registro
-  const navigate = useNavigate(); // Hook para redirigir
+  const { registro } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
-    if (password !== password2) {
-      setMensaje('Las contraseñas no coinciden');
+    // 1. Validaciones explícitas
+    if (formData.password.length < 6) {
+      setAlerta({ tipo: 'danger', mensaje: 'La contraseña debe tener al menos 6 caracteres.' });
+      return;
+    }
+    if (formData.password !== formData.password2) {
+      setAlerta({ tipo: 'danger', mensaje: 'Las contraseñas no coinciden.' });
       return;
     }
 
-    // 3. Llama a la función de registro del contexto
+    // 2. Intento de registro
     const exito = registro({
-      nombre,
-      correo,
-      telefono,
-      direccion,
-      password 
+      nombre: formData.nombre,
+      correo: formData.correo,
+      telefono: formData.telefono,
+      direccion: formData.direccion,
+      password: formData.password
     });
 
     if (exito) {
-      setMensaje('¡Registro exitoso! Serás redirigido al Login.');
+      setAlerta({ tipo: 'success', mensaje: '¡Registro exitoso! Redirigiendo al login...' });
       setTimeout(() => navigate('/login'), 2000);
     } else {
-      setMensaje('El correo ya está registrado.');
+      setAlerta({ tipo: 'danger', mensaje: 'El correo ya está registrado.' });
     }
   };
 
   return (
-    <main className="container my-5 registro-content">
-      <div className="form-container mx-auto" style={{ maxWidth: "500px" }}>
-        <h1 className="text-center mb-4">Crear cuenta</h1>
-        
-        {/* 4. Conecta el formulario a la función handleSubmit */}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="nombre" className="form-label">Nombre completo</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              id="nombre" 
-              placeholder="Ej: Humberto Suazo" 
-              required 
-              value={nombre} 
-              onChange={(e) => setNombre(e.target.value)} 
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="correo" className="form-label">Correo electrónico</label>
-            <input 
-              type="email" 
-              className="form-control" 
-              id="correo" 
-              placeholder="ejemplo@email.com" 
-              required 
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="telefono" className="form-label">Teléfono</label>
-            <input 
-              type="tel" 
-              className="form-control" 
-              id="telefono" 
-              placeholder="+56 9 1234 5678"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="direccion" className="form-label">Dirección</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              id="direccion" 
-              placeholder="Calle, número, ciudad"
-              value={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">Contraseña</label>
-            <input 
-              type="password" 
-              className="form-control" 
-              id="password" 
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="password2" className="form-label">Confirmar contraseña</label>
-            <input 
-              type="password" 
-              className="form-control" 
-              id="password2" 
-              required 
-              value={password2}
-              onChange={(e) => setPassword2(e.target.value)}
-            />
-          </div>
-          <button type="submit" className="btn btn-success w-100">Registrarse</button>
-        </form>
-        
-        {mensaje && <p className="text-center mt-3">{mensaje}</p>}
-        
-        <p className="text-center mt-3">
-          ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
-        </p>
+    <main className="container my-5">
+      <div className="card shadow-lg mx-auto" style={{ maxWidth: "500px" }}>
+        <div className="card-body p-5">
+          <h1 className="text-center mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Crear Cuenta</h1>
+
+          {/* Feedback Visual Inmediato */}
+          {alerta.mensaje && (
+            <div className={`alert alert-${alerta.tipo}`} role="alert">
+              {alerta.mensaje}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label className="form-label">Nombre completo <span className="text-danger">*</span></label>
+              <input type="text" className="form-control" id="nombre" required
+                     value={formData.nombre} onChange={handleChange} />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Correo electrónico <span className="text-danger">*</span></label>
+              <input type="email" className="form-control" id="correo" required
+                     value={formData.correo} onChange={handleChange} />
+            </div>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Teléfono</label>
+                <input type="tel" className="form-control" id="telefono" placeholder="+569..."
+                       value={formData.telefono} onChange={handleChange} />
+              </div>
+              <div className="col-md-6 mb-3">
+                 <label className="form-label">Dirección</label>
+                 <input type="text" className="form-control" id="direccion"
+                        value={formData.direccion} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Contraseña <span className="text-danger">*</span></label>
+              <input type="password" className="form-control" id="password" required minLength={6}
+                     value={formData.password} onChange={handleChange} />
+              <div className="form-text">Mínimo 6 caracteres.</div>
+            </div>
+            <div className="mb-4">
+              <label className="form-label">Confirmar contraseña <span className="text-danger">*</span></label>
+              <input type="password" className="form-control" id="password2" required
+                     value={formData.password2} onChange={handleChange} />
+            </div>
+            <div className="d-grid">
+              <button type="submit" className="btn btn-success btn-lg">Registrarse</button>
+            </div>
+          </form>
+          <hr className="my-4" />
+          <p className="text-center m-0">
+            ¿Ya tienes cuenta? <Link to="/login" className="text-success fw-bold text-decoration-none">Inicia sesión aquí</Link>
+          </p>
+        </div>
       </div>
     </main>
   );

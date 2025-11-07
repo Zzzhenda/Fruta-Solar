@@ -12,7 +12,10 @@ import { Registro } from './pages/Registro';
 import { Carrito } from './pages/Carrito';
 import { Perfil } from './pages/Perfil'; // <--- 1. IMPORTA EL COMPONENTE PERFIL
 import { AdminDashboard } from './pages/admin/AdminDashboard';
-
+import { AdminProductos } from './pages/admin/AdminProductos';
+import { AdminPedidos } from './pages/admin/AdminPedidos';
+import { AdminUsuarios } from './pages/admin/AdminUsuarios';
+import { AdminReportes } from './pages/admin/AdminReportes';
 function App() {
   return (
     <>
@@ -25,14 +28,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
           <Route path="/carrito" element={<Carrito />} />
-          <Route path="/perfil" element={<Perfil />} /> {/* <--- 2. AGREGA LA RUTA */}
-          <Route path="/admin" element={<AdminDashboard />} /> {/* <--- NUEVA RUTA */}
-          {/* Aquí agregaremos próximamente:
-              /admin/productos
-              /admin/pedidos
-              etc.
-          */}
-          
+          <Route path="/perfil" element={<Perfil />} /> 
+          <Route path="/admin" element={<AdminDashboard />} /> 
+          <Route path="/admin/productos" element={<AdminProductos />} /> 
+          <Route path="/admin/pedidos" element={<AdminPedidos />} />
+          <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+          <Route path="/admin/reportes" element={<AdminReportes />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
