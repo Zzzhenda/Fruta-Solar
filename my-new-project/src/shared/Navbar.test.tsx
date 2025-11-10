@@ -1,37 +1,43 @@
+// src/shared/Navbar.test.tsx
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { Navbar } from './Navbar'; // Asume que el test está en la misma carpeta 'shared'
+import { Navbar } from './Navbar';
 import { BrowserRouter } from 'react-router-dom';
 import * as AuthContext from '../context/AuthContext';
 import * as CartContext from '../context/CartContext';
+import { NotificationProvider } from '../context/NotificationContext'; // <-- AÑADIR
 
-// Mock parcial de los hooks
-vi.mock('../context/AuthContext', async () => {
-  const actual = await vi.importActual('../context/AuthContext');
-  return { ...actual, useAuth: vi.fn() };
-});
-vi.mock('../context/CartContext', async () => {
-    const actual = await vi.importActual('../context/CartContext');
-    return { ...actual, useCart: vi.fn() };
-});
+// ... (mocks)
+const mockUseAuth = vi.mocked(AuthContext.useAuth);
+const mockUseCart = vi.mocked(CartContext.useCart);
+
+const renderNav = () => {
+  render(
+    <BrowserRouter>
+      <NotificationProvider> {/* <-- ENVOLVER */}
+        <Navbar />
+      </NotificationProvider>
+    </BrowserRouter>
+  );
+}
 
 describe('Navbar Component', () => {
   it('muestra enlace de Login cuando NO hay usuario', () => {
-    (AuthContext.useAuth as any).mockReturnValue({ usuarioActual: null });
-    (CartContext.useCart as any).mockReturnValue({ totalItems: 0 });
+    mockUseAuth.mockReturnValue({ usuarioActual: null } as any);
+    mockUseCart.mockReturnValue({ totalItems: 0 } as any);
 
-    render(<BrowserRouter><Navbar /></BrowserRouter>);
+    renderNav();
     expect(screen.getByText(/Login/i)).toBeInTheDocument();
   });
 
   it('muestra el nombre del usuario cuando SI está logueado', () => {
-     (AuthContext.useAuth as any).mockReturnValue({
+     mockUseAuth.mockReturnValue({
         usuarioActual: { nombre: 'Juanito Tester', rol: 'cliente' },
-    });
-    (CartContext.useCart as any).mockReturnValue({ totalItems: 5 });
+    } as any);
+    mockUseCart.mockReturnValue({ totalItems: 5 } as any);
 
-    render(<BrowserRouter><Navbar /></BrowserRouter>);
-    expect(screen.getByText(/Hola, compa Tester/i)).toBeInTheDocument();
-    expect(screen.getByText('5')).toBeInTheDocument(); // Badge del carrito
+    renderNav();
+    expect(screen.getByText(/Hola, Juanito Tester/i)).toBeInTheDocument(); // <-- Corregido
+    expect(screen.getByText('5')).toBeInTheDocument();
   });
 });

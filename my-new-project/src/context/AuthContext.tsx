@@ -34,10 +34,10 @@ interface AuthContextType {
   agregarPedido: (nuevoPedido: Pedido) => void;
   getAllPedidos: () => Array<Pedido & { clienteEmail: string; clienteNombre: string }>;
   actualizarEstadoPedido: (pedidoId: number, nuevoEstado: string) => void;
-  // Nuevas funciones para gestión de usuarios
   getAllUsuarios: () => Usuario[];
   editarUsuario: (usuarioEditado: Usuario) => void;
   eliminarUsuario: (correoAEliminar: string) => boolean;
+  actualizarDatosUsuario: (datosActualizados: Pick<Usuario, 'nombre' | 'telefono' | 'direccion'>) => boolean; // <-- NUEVA
 }
 
 const TIENDA_KEY = 'miTienda';
@@ -185,8 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (pedidoEncontrado) setDatosTienda(tienda);
   };
 
-  // --- GESTIÓN DE USUARIOS (NUEVO) ---
-
+  // --- GESTIÓN DE USUARIOS (Admin) ---
   const getAllUsuarios = () => {
     return getDatosTienda().usuarios;
   };
@@ -195,14 +194,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const tienda = getDatosTienda();
     const idx = tienda.usuarios.findIndex(u => u.correo === usuarioEditado.correo);
     if (idx !== -1) {
-       // Mantenemos carrito y pedidos originales para no perderlos al editar datos básicos
        tienda.usuarios[idx] = {
          ...usuarioEditado,
          carrito: tienda.usuarios[idx].carrito,
          pedidos: tienda.usuarios[idx].pedidos
        };
        setDatosTienda(tienda);
-       // Si el admin se edita a sí mismo, actualizamos el estado local
        if (usuarioActual && usuarioActual.correo === usuarioEditado.correo) {
            setUsuarioActual(tienda.usuarios[idx]);
        }
@@ -210,7 +207,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const eliminarUsuario = (correoAEliminar: string) => {
-    // Validación de seguridad: no permitir auto-eliminación
     if (usuarioActual && usuarioActual.correo === correoAEliminar) {
         alert("No puedes eliminar tu propia cuenta de administrador mientras estás logueado.");
         return false;
@@ -226,10 +222,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
+  // --- GESTIÓN DE USUARIO (Cliente) ---
+  const actualizarDatosUsuario = (datosActualizados: Pick<Usuario, 'nombre' | 'telefono' | 'direccion'>) => {
+    if (!usuarioActual) return false;
+
+    const tienda = getDatosTienda();
+    const userIndex = tienda.usuarios.findIndex(u => u.correo === usuarioActual.correo);
+
+    if (userIndex !== -1) {
+      const usuarioActualizado = {
+        ...tienda.usuarios[userIndex],
+        nombre: datosActualizados.nombre,
+        telefono: datosActualizados.telefono,
+        direccion: datosActualizados.direccion,
+      };
+
+      tienda.usuarios[userIndex] = usuarioActualizado;
+      setDatosTienda(tienda);
+      
+      setUsuarioActual(usuarioActualizado);
+      return true;
+    }
+    return false;
+  };
+
   const value = {
     usuarioActual, login, registro, logout, agregarPedido,
     getAllPedidos, actualizarEstadoPedido,
-    getAllUsuarios, editarUsuario, eliminarUsuario // <--- Exportamos las nuevas funciones
+    getAllUsuarios, editarUsuario, eliminarUsuario,
+    actualizarDatosUsuario // <-- EXPORTAR
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

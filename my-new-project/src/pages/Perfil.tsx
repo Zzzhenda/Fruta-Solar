@@ -1,13 +1,41 @@
+// src/pages/Perfil.tsx
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
+import { useNotification } from '../context/NotificationContext'; // <-- IMPORTAR
 
 export function Perfil() {
-  const { usuarioActual, logout } = useAuth();
+  const { usuarioActual, logout, actualizarDatosUsuario } = useAuth();
+  const { addNotification } = useNotification(); // <-- OBTENER HOOK
+  const [isEditing, setIsEditing] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    nombre: usuarioActual?.nombre || '',
+    telefono: usuarioActual?.telefono || '',
+    direccion: usuarioActual?.direccion || '',
+  });
 
-  // Protección de ruta: Si no hay usuario, redirige al login
   if (!usuarioActual) {
     return <Navigate to="/login" replace />;
   }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const exito = actualizarDatosUsuario(formData);
+    if (exito) {
+      setIsEditing(false);
+      addNotification("Perfil actualizado con éxito", 'success'); // <-- NOTIFICACIÓN
+    } else {
+      addNotification("Error al actualizar el perfil", 'danger');
+    }
+  };
 
   return (
     <main className="container my-5">
@@ -20,33 +48,90 @@ export function Perfil() {
             <div className="card-header bg-success text-white py-3">
               <h5 className="mb-0">Mis Datos Personales</h5>
             </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="small text-muted">Nombre completo</label>
-                <p className="fw-medium fs-5">{usuarioActual.nombre}</p>
+            
+            {!isEditing ? (
+              // --- VISTA DE SOLO LECTURA ---
+              <div className="card-body">
+                <div className="mb-3">
+                  <label className="small text-muted">Nombre completo</label>
+                  <p className="fw-medium fs-5">{usuarioActual.nombre}</p>
+                </div>
+                <div className="mb-3">
+                  <label className="small text-muted">Correo electrónico</label>
+                  <p className="fw-medium">{usuarioActual.correo}</p>
+                </div>
+                <div className="mb-3">
+                  <label className="small text-muted">Teléfono</label>
+                  <p>{usuarioActual.telefono || <em className="text-muted">No especificado</em>}</p>
+                </div>
+                <div className="mb-4">
+                  <label className="small text-muted">Dirección de envío</label>
+                  <p>{usuarioActual.direccion || <em className="text-muted">No especificada</em>}</p>
+                </div>
+                
+                <div className="d-grid gap-2">
+                  <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
+                    Editar Perfil
+                  </button>
+                  <button className="btn btn-outline-danger" onClick={logout}>
+                    Cerrar Sesión
+                  </button>
+                </div>
               </div>
-              <div className="mb-3">
-                <label className="small text-muted">Correo electrónico</label>
-                <p className="fw-medium">{usuarioActual.correo}</p>
+
+            ) : (
+              // --- VISTA DE EDICIÓN ---
+              <div className="card-body">
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <label className="form-label">Nombre completo</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Correo electrónico</label>
+                    <input 
+                      type="email" 
+                      className="form-control" 
+                      value={usuarioActual.correo}
+                      disabled
+                      readOnly
+                    />
+                    <div className="form-text">El correo no se puede modificar.</div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Teléfono</label>
+                    <input 
+                      type="tel" 
+                      className="form-control" 
+                      name="telefono"
+                      value={formData.telefono}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="form-label">Dirección de envío</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      name="direccion"
+                      value={formData.direccion}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="d-grid gap-2">
+                    <button type="submit" className="btn btn-success">Guardar Cambios</button>
+                    <button type="button" className="btn btn-secondary" onClick={() => setIsEditing(false)}>Cancelar</button>
+                  </div>
+                </form>
               </div>
-              <div className="mb-3">
-                <label className="small text-muted">Teléfono</label>
-                <p>{usuarioActual.telefono || <em className="text-muted">No especificado</em>}</p>
-              </div>
-              <div className="mb-4">
-                <label className="small text-muted">Dirección de envío</label>
-                <p>{usuarioActual.direccion || <em className="text-muted">No especificada</em>}</p>
-              </div>
-              
-              <div className="d-grid gap-2">
-                <button className="btn btn-outline-primary" disabled>
-                  Editar Perfil (Próximamente)
-                </button>
-                <button className="btn btn-outline-danger" onClick={logout}>
-                  Cerrar Sesión
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -72,9 +157,9 @@ export function Perfil() {
                       </p>
                       <ul className="mb-3 ps-3">
                         {pedido.productos.map((prod, idx) => (
-                           <li key={idx} className="small">
-                             {prod.cantidad}x {prod.nombre} - ${(prod.precio * prod.cantidad).toLocaleString('es-CL')}
-                           </li>
+                            <li key={idx} className="small">
+                              {prod.cantidad}x {prod.nombre} - ${(prod.precio * prod.cantidad).toLocaleString('es-CL')}
+                            </li>
                         ))}
                       </ul>
                       <h5 className="text-end text-success mb-0">

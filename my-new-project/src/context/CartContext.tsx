@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import type { Usuario, CarritoItem, Pedido } from './AuthContext';
 import { useProducts } from './ProductContext';
 import type { Producto } from '../data/productos';
+import { useNotification } from './NotificationContext'; // <-- IMPORTAR NOTIFICACIONES
 
 interface CartContextType {
   carrito: CarritoItem[];
@@ -11,7 +12,7 @@ interface CartContextType {
   quitarDelCarrito: (id: string) => void;
   actualizarCantidad: (id: string, nuevaCantidad: number) => void;
   vaciarCarrito: () => void;
-  finalizarCompra: () => boolean; // <--- NUEVA FUNCIÓN
+  finalizarCompra: () => boolean;
   totalCarrito: number;
   totalItems: number;
 }
@@ -20,9 +21,9 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [carrito, setCarrito] = useState<CarritoItem[]>([]);
-  // Obtenemos las nuevas funciones de los otros contextos
   const { usuarioActual, agregarPedido } = useAuth();
   const { getProductoById, reducirStock } = useProducts();
+  const { addNotification } = useNotification(); // <-- OBTENER HOOK
 
   useEffect(() => {
     if (usuarioActual) {
@@ -51,7 +52,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const agregarAlCarrito = (producto: Producto) => {
     const productoEnStock = getProductoById(producto.id);
     if (!productoEnStock || productoEnStock.stock <= 0) {
-      alert("¡Producto agotado!");
+      addNotification("¡Producto agotado!", 'danger'); // <-- REEMPLAZO DE ALERT
       return false;
     }
 
@@ -59,7 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     
     if (existente) {
       if (existente.cantidad >= productoEnStock.stock) {
-        alert("No puedes agregar más de este producto, ¡has alcanzado el stock máximo!");
+        addNotification("No puedes agregar más, ¡stock máximo alcanzado!", 'warning'); // <-- REEMPLAZO
         return false;
       }
       const nuevoCarrito = carrito.map(item =>
@@ -69,24 +70,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } else {
       guardarCarrito([...carrito, { ...producto, cantidad: 1 }]);
     }
-    alert(`Producto "${producto.nombre}" agregado al carrito.`);
+    addNotification(`"${producto.nombre}" agregado al carrito.`, 'success'); // <-- REEMPLAZO
     return true;
   };
 
   const quitarDelCarrito = (id: string) => {
     const nuevoCarrito = carrito.filter(item => item.id !== id);
     guardarCarrito(nuevoCarrito);
+    addNotification("Producto quitado del carrito", 'info'); // <-- REEMPLAZO
   };
   
   const actualizarCantidad = (id: string, nuevaCantidad: number) => {
     if (nuevaCantidad <= 0) {
-      quitarDelCarrito(id);
+      quitarDelCarrito(id); // quitarDelCarrito ya tiene notificación
       return;
     }
     
     const productoEnStock = getProductoById(id);
     if (productoEnStock && nuevaCantidad > productoEnStock.stock) {
-      alert("No hay más stock disponible.");
+      addNotification("No hay más stock disponible.", 'warning'); // <-- REEMPLAZO
       return;
     }
 
@@ -103,20 +105,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalCarrito = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
   const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
 
-  // Lógica principal de compra
   const finalizarCompra = () => {
     if (!usuarioActual || carrito.length === 0) return false;
 
-    // 1. Validar stock una última vez
     for (const item of carrito) {
       const productoReal = getProductoById(item.id);
       if (!productoReal || productoReal.stock < item.cantidad) {
-        alert(`Error: No hay suficiente stock de ${item.nombre}`);
+        addNotification(`Error: No hay suficiente stock de ${item.nombre}`, 'danger'); // <-- REEMPLAZO
         return false;
       }
     }
 
-    // 2. Crear el pedido
     const nuevoPedido: Pedido = {
       id: Date.now(),
       fecha: new Date().toLocaleDateString(),
@@ -126,15 +125,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       estado: 'Pendiente'
     };
 
-    // 3. Reducir stock
     carrito.forEach(item => {
       reducirStock(item.id, item.cantidad);
     });
 
-    // 4. Guardar pedido
     agregarPedido(nuevoPedido);
-
-    // 5. Vaciar carrito local
     setCarrito([]);
     localStorage.removeItem('carritoInvitado');
 

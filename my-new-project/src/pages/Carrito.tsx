@@ -2,51 +2,57 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 
 export function Carrito() {
-  // Obtenemos finalizarCompra del hook
   const { carrito, totalCarrito, actualizarCantidad, quitarDelCarrito, finalizarCompra } = useCart();
   const { usuarioActual } = useAuth();
   const navigate = useNavigate();
+  const { addNotification } = useNotification();
 
   const handleCheckout = () => {
     if (!usuarioActual) {
-      alert("Debes iniciar sesión para finalizar la compra.");
+      addNotification("Debes iniciar sesión para finalizar la compra.", 'info');
       navigate('/login');
       return;
     }
     if (carrito.length === 0) {
-      alert("El carrito está vacío.");
+      addNotification("El carrito está vacío.", 'warning');
       return;
     }
 
-    // Llamada a la lógica real
     const exito = finalizarCompra();
 
     if (exito) {
-      alert("¡Compra realizada con éxito! Puedes ver el detalle en tu perfil.");
+      addNotification("¡Compra realizada con éxito! Revisa tu perfil.", 'success');
       navigate('/perfil');
     } else {
-      alert("Hubo un problema al procesar tu compra. Por favor intenta nuevamente.");
+      // Notificación de error de stock ya la da el CartContext
     }
   };
 
   if (carrito.length === 0) {
     return (
-      <div className="container my-5 text-center">
-        <h2 className="my-4">Tu carrito está vacío</h2>
-        <p className="mb-4">¿Por qué no agregas algunas frutas frescas?</p>
-        <Link to="/catalogo" className="btn btn-success btn-lg">Ir al Catálogo</Link>
+      // --- ¡ARREGLO AQUÍ! ---
+      // Añadimos la clase 'seccion-catalogo' (de tu style.css) para el fondo oscuro
+      <div className="container my-5">
+        <div className="text-center seccion-catalogo" style={{maxWidth: '600px', margin: 'auto'}}>
+          <h2 className="my-4" style={{color: '#fff'}}>Tu carrito está vacío</h2>
+          <p className="mb-4">¿Por qué no agregas algunas frutas frescas?</p>
+          <Link to="/catalogo" className="btn btn-success btn-lg">Ir al Catálogo</Link>
+        </div>
       </div>
     );
   }
 
   return (
     <main className="container my-5">
-      <h1 className="text-center mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Mi Carrito</h1>
+      {/* El h1 aquí usará la regla H1 de tu CSS (verde, sombra) */}
+      <h1 className="text-center mb-4">Mi Carrito</h1>
       
       <div className="row">
         <div className="col-lg-9">
+          {/* Esta tarjeta es blanca por defecto, lo cual está bien para la tabla */}
           <div className="table-responsive card shadow-sm border-0">
             <table className="table table-hover align-middle mb-0">
               <thead className="table-success">
@@ -78,7 +84,7 @@ export function Carrito() {
                     <td className="fw-medium">${(item.precio * item.cantidad).toLocaleString('es-CL')}</td>
                     <td className="text-end">
                       <button className="btn btn-outline-danger btn-sm" onClick={() => quitarDelCarrito(item.id)} title="Eliminar producto">
-                        <i className="bi bi-trash"></i> Eliminar
+                        Eliminar
                       </button>
                     </td>
                   </tr>
