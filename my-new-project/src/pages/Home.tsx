@@ -32,7 +32,7 @@ export function Home() {
           </div>
           <div className="col-md-4 mb-4">
             <div className="card h-100 border-0 shadow-sm">
-              <img src="https://www.foronuclear.org/wp-content/uploads/2018/06/nubes.jpg" className="card-img-top" alt="Sostenibilidad" />
+              <img src="https://tse2.mm.bing.net/th/id/OIP.O50SDh0pQhpCgPholFIIDAHaEo?rs=1&pid=ImgDetMain&o=7&rm=3" className="card-img-top" alt="Sostenibilidad" />
               <div className="card-body d-flex flex-column">
                 <h5 className="card-title">Sostenibilidad</h5>
                 <p className="card-text">Comprometidos con prácticas agrícolas responsables y el cuidado del medio ambiente.</p>
