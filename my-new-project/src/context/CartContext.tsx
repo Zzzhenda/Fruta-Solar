@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 import type { Usuario, CarritoItem, Pedido } from './AuthContext';
 import { useProducts } from './ProductContext';
 import type { Producto } from '../data/productos';
-import { useNotification } from './NotificationContext'; // <-- IMPORTAR NOTIFICACIONES
+import { useNotification } from './NotificationContext'; 
 
 interface CartContextType {
   carrito: CarritoItem[];
@@ -23,7 +23,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [carrito, setCarrito] = useState<CarritoItem[]>([]);
   const { usuarioActual, agregarPedido } = useAuth();
   const { getProductoById, reducirStock } = useProducts();
-  const { addNotification } = useNotification(); // <-- OBTENER HOOK
+  const { addNotification } = useNotification(); 
 
   useEffect(() => {
     if (usuarioActual) {
@@ -52,7 +52,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const agregarAlCarrito = (producto: Producto) => {
     const productoEnStock = getProductoById(producto.id);
     if (!productoEnStock || productoEnStock.stock <= 0) {
-      addNotification("¡Producto agotado!", 'danger'); // <-- REEMPLAZO DE ALERT
+      addNotification("¡Producto agotado!", 'danger'); 
       return false;
     }
 
@@ -60,7 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     
     if (existente) {
       if (existente.cantidad >= productoEnStock.stock) {
-        addNotification("No puedes agregar más, ¡stock máximo alcanzado!", 'warning'); // <-- REEMPLAZO
+        addNotification("No puedes agregar más, ¡stock máximo alcanzado!", 'warning'); 
         return false;
       }
       const nuevoCarrito = carrito.map(item =>
@@ -70,7 +70,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } else {
       guardarCarrito([...carrito, { ...producto, cantidad: 1 }]);
     }
-    addNotification(`"${producto.nombre}" agregado al carrito.`, 'success'); // <-- REEMPLAZO
+    addNotification(`"${producto.nombre}" agregado al carrito.`, 'success'); 
     return true;
   };
 

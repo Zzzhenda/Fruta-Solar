@@ -6,20 +6,21 @@ import { useNavigate, Link } from 'react-router-dom';
 export function Login() {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); // Estado específico para errores
-
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => { // <--- ASYNC
     e.preventDefault();
-    setError(''); // Limpiar errores previos
-
-    const exito = login(correo, password);
+    setError('');
+    
+    // LOGIN REAL
+    const exito = await login(correo, password); // <--- AWAIT
+    
     if (exito) {
-      navigate('/perfil'); // Redirección inmediata si es exitoso
+      navigate('/perfil');
     } else {
-      setError('Credenciales incorrectas. Verifica tu correo y contraseña.');
+      setError('Credenciales incorrectas o error de servidor.');
     }
   };
 
@@ -27,47 +28,24 @@ export function Login() {
     <main className="container my-5">
       <div className="card shadow-lg mx-auto" style={{ maxWidth: "450px" }}>
         <div className="card-body p-5">
-          <h1 className="text-center mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Bienvenido</h1>
-
-          {/* Alerta de Error */}
-          {error && (
-            <div className="alert alert-danger d-flex align-items-center" role="alert">
-              <i className="bi bi-exclamation-triangle-fill me-2"></i>
-              <div>{error}</div>
-            </div>
-          )}
-
+          <h1 className="text-center mb-4">Bienvenido</h1>
+          {error && <div className="alert alert-danger">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label htmlFor="correo" className="form-label">Correo electrónico</label>
-              <input
-                type="email"
-                className={`form-control ${error ? 'is-invalid' : ''}`} // Feedback visual en el input
-                id="correo"
-                required
-                value={correo}
-                onChange={(e) => setCorreo(e.target.value)}
-              />
+              <label className="form-label">Correo electrónico</label>
+              <input type="text" className="form-control" value={correo} onChange={(e) => setCorreo(e.target.value)} required />
             </div>
             <div className="mb-4">
-              <label htmlFor="password" className="form-label">Contraseña</label>
-              <input
-                type="password"
-                className={`form-control ${error ? 'is-invalid' : ''}`}
-                id="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <label className="form-label">Contraseña</label>
+              <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             <div className="d-grid">
               <button type="submit" className="btn btn-success btn-lg">Ingresar</button>
             </div>
           </form>
-
           <hr className="my-4" />
           <p className="text-center m-0">
-            ¿Nuevo en Fruto Solar? <Link to="/registro" className="text-success fw-bold text-decoration-none">Crea tu cuenta</Link>
+            ¿Nuevo? <Link to="/registro" className="text-success fw-bold text-decoration-none">Crea tu cuenta</Link>
           </p>
         </div>
       </div>
