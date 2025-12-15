@@ -1,4 +1,3 @@
-// src/pages/admin/AdminUsuarios.tsx
 import { useState, useEffect } from 'react';
 import { useAuth, type Usuario } from '../../context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
@@ -14,8 +13,9 @@ export function AdminUsuarios() {
     return <Navigate to="/" replace />;
   }
 
-  const refrescarUsuarios = () => {
-    setUsuarios(getAllUsuarios());
+  const refrescarUsuarios = async () => {
+    const datos = await getAllUsuarios();
+    setUsuarios(datos);
   };
 
   useEffect(() => {
@@ -27,23 +27,29 @@ export function AdminUsuarios() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleEliminarClick = (correo: string) => {
+  // --- CORRECCIÓN 1: Agregar 'async' y 'await' ---
+  const handleEliminarClick = async (correo: string) => {
     if (window.confirm(`¿Estás seguro de eliminar al usuario ${correo}? Esta acción es irreversible.`)) {
-      const exito = eliminarUsuario(correo);
+      // Esperamos a que la promesa se resuelva para obtener el booleano real
+      const exito = await eliminarUsuario(correo); 
+      
       if (exito) {
         addNotification('Usuario eliminado correctamente.', 'warning');
         refrescarUsuarios();
         if (usuarioEnEdicion?.correo === correo) {
             setUsuarioEnEdicion(null);
         }
+      } else {
+        addNotification('Error al eliminar usuario.', 'danger');
       }
     }
   };
 
-  const handleSubmitEdicion = (e: React.FormEvent) => {
+  // --- CORRECCIÓN 2: Agregar 'async' y 'await' también aquí ---
+  const handleSubmitEdicion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (usuarioEnEdicion) {
-      editarUsuario(usuarioEnEdicion);
+      await editarUsuario(usuarioEnEdicion); // Esperar a que se guarde
       addNotification('Usuario actualizado correctamente.', 'success');
       setUsuarioEnEdicion(null);
       refrescarUsuarios();
@@ -124,7 +130,6 @@ export function AdminUsuarios() {
 
         {/* LISTA DE USUARIOS */}
         <div className={usuarioEnEdicion ? "col-lg-8" : "col-12"}>
-          {/* ¡ARREGLO AQUÍ! Se añadió 'admin-table-card' para el fix de CSS */}
           <div className="card shadow-sm border-0 admin-table-card">
             <div className="card-body p-0">
               <table className="table table-hover align-middle mb-0">

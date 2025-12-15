@@ -1,6 +1,13 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
+// Contextos
+import { AuthProvider } from './context/AuthContext';
+import { ProductProvider } from './context/ProductContext';
+import { NotificationProvider } from './context/NotificationContext';
+import { CartProvider } from './context/CartContext';
+
+// Componentes UI
 import { Navbar } from './shared/Navbar';
 import { Footer } from './shared/Footer';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -25,31 +32,52 @@ const AdminReportes = lazy(() => import('./pages/admin/AdminReportes').then(modu
 
 function App() {
   return (
-    <>
-      <Navbar />
-      <Notifications />
-      <main style={{ minHeight: '80vh' }}>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/catalogo" element={<Catalogo />} />
-            <Route path="/impacto" element={<Impacto />} />
-            <Route path="/contacto" element={<Contacto />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/registro" element={<Registro />} />
-            <Route path="/carrito" element={<Carrito />} />
-            <Route path="/perfil" element={<Perfil />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/productos" element={<AdminProductos />} />
-            <Route path="/admin/pedidos" element={<AdminPedidos />} />
-            <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-            <Route path="/admin/reportes" element={<AdminReportes />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </Suspense>
-      </main>
-      <Footer />
-    </>
+    /* CORRECCIÓN IMPORTANTE DE ORDEN:
+       1. NotificationProvider va PRIMERO para que todos (Auth, Product, Cart) puedan lanzar alertas.
+       2. AuthProvider suele ir segundo para manejar usuario.
+       3. ProductProvider tercero.
+       4. CartProvider cuarto.
+    */
+    <NotificationProvider>
+      <AuthProvider>
+        <ProductProvider>
+          <CartProvider>
+            <BrowserRouter>
+              <Navbar />
+              <Notifications />
+              <main style={{ minHeight: '80vh' }}>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Routes>
+                    {/* Rutas Públicas */}
+                    <Route path="/" element={<Home />} />
+                    <Route path="/catalogo" element={<Catalogo />} />
+                    <Route path="/impacto" element={<Impacto />} />
+                    <Route path="/contacto" element={<Contacto />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/registro" element={<Registro />} />
+                    
+                    {/* Rutas Privadas Cliente */}
+                    <Route path="/carrito" element={<Carrito />} />
+                    <Route path="/perfil" element={<Perfil />} />
+                    
+                    {/* Rutas Admin */}
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/productos" element={<AdminProductos />} />
+                    <Route path="/admin/pedidos" element={<AdminPedidos />} />
+                    <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+                    <Route path="/admin/reportes" element={<AdminReportes />} />
+                    
+                    {/* Fallback */}
+                    <Route path="*" element={<Navigate to="/" />} />
+                  </Routes>
+                </Suspense>
+              </main>
+              <Footer />
+            </BrowserRouter>
+          </CartProvider>
+        </ProductProvider>
+      </AuthProvider>
+    </NotificationProvider>
   );
 }
 

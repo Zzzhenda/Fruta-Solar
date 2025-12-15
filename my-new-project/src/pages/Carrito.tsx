@@ -10,7 +10,7 @@ export function Carrito() {
   const navigate = useNavigate();
   const { addNotification } = useNotification();
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!usuarioActual) {
       addNotification("Debes iniciar sesión para finalizar la compra.", 'info');
       navigate('/login');
@@ -21,20 +21,18 @@ export function Carrito() {
       return;
     }
 
-    const exito = finalizarCompra();
+    // Esperamos la respuesta del backend
+    const exito = await finalizarCompra();
 
     if (exito) {
       addNotification("¡Compra realizada con éxito! Revisa tu perfil.", 'success');
       navigate('/perfil');
-    } else {
-      // Notificación de error de stock ya la da el CartContext
     }
+    // Si falla, el CartContext ya muestra la notificación de error
   };
 
   if (carrito.length === 0) {
     return (
-      // --- ¡ARREGLO AQUÍ! ---
-      // Añadimos la clase 'seccion-catalogo' (de tu style.css) para el fondo oscuro
       <div className="container my-5">
         <div className="text-center seccion-catalogo" style={{maxWidth: '600px', margin: 'auto'}}>
           <h2 className="my-4" style={{color: '#fff'}}>Tu carrito está vacío</h2>
@@ -47,12 +45,10 @@ export function Carrito() {
 
   return (
     <main className="container my-5">
-      {/* El h1 aquí usará la regla H1 de tu CSS (verde, sombra) */}
       <h1 className="text-center mb-4">Mi Carrito</h1>
       
       <div className="row">
         <div className="col-lg-9">
-          {/* Esta tarjeta es blanca por defecto, lo cual está bien para la tabla */}
           <div className="table-responsive card shadow-sm border-0">
             <table className="table table-hover align-middle mb-0">
               <thead className="table-success">

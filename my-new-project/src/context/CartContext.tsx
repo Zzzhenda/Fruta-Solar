@@ -12,7 +12,7 @@ interface CartContextType {
   quitarDelCarrito: (id: string) => void;
   actualizarCantidad: (id: string, nuevaCantidad: number) => void;
   vaciarCarrito: () => void;
-  finalizarCompra: () => boolean;
+  finalizarCompra: () => Promise<boolean>; // <--- AHORA DEVUELVE UNA PROMESA
   totalCarrito: number;
   totalItems: number;
 }
@@ -25,6 +25,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { getProductoById, reducirStock } = useProducts();
   const { addNotification } = useNotification(); 
 
+  // Cargar carrito inicial
   useEffect(() => {
     if (usuarioActual) {
       setCarrito(usuarioActual.carrito || []);
@@ -39,10 +40,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     if (usuarioActual) {
       const tienda = JSON.parse(localStorage.getItem('miTienda') || '{}');
-      const userIndex = tienda.usuarios.findIndex((u: Usuario) => u.correo === usuarioActual.correo);
-      if (userIndex !== -1) {
-        tienda.usuarios[userIndex].carrito = nuevoCarrito;
-        localStorage.setItem('miTienda', JSON.stringify(tienda));
+      // Nota: Esto es persistencia local simulada, idealmente se enviaría al backend
+      if (tienda.usuarios) {
+          const userIndex = tienda.usuarios.findIndex((u: Usuario) => u.correo === usuarioActual.correo);
+          if (userIndex !== -1) {
+            tienda.usuarios[userIndex].carrito = nuevoCarrito;
+            localStorage.setItem('miTienda', JSON.stringify(tienda));
+          }
       }
     } else {
       localStorage.setItem('carritoInvitado', JSON.stringify(nuevoCarrito));
@@ -77,18 +81,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const quitarDelCarrito = (id: string) => {
     const nuevoCarrito = carrito.filter(item => item.id !== id);
     guardarCarrito(nuevoCarrito);
-    addNotification("Producto quitado del carrito", 'info'); // <-- REEMPLAZO
+    addNotification("Producto quitado del carrito", 'info'); 
   };
   
   const actualizarCantidad = (id: string, nuevaCantidad: number) => {
     if (nuevaCantidad <= 0) {
-      quitarDelCarrito(id); // quitarDelCarrito ya tiene notificación
+      quitarDelCarrito(id); 
       return;
     }
     
     const productoEnStock = getProductoById(id);
     if (productoEnStock && nuevaCantidad > productoEnStock.stock) {
-      addNotification("No hay más stock disponible.", 'warning'); // <-- REEMPLAZO
+      addNotification("No hay más stock disponible.", 'warning'); 
       return;
     }
 
@@ -105,19 +109,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalCarrito = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
   const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
 
-  const finalizarCompra = () => {
+  // --- LÓGICA DE COMPRA CORREGIDA ---
+  const finalizarCompra = async (): Promise<boolean> => { // <--- ASYNC
     if (!usuarioActual || carrito.length === 0) return false;
 
+    // 1. Validación de stock local antes de enviar
     for (const item of carrito) {
       const productoReal = getProductoById(item.id);
       if (!productoReal || productoReal.stock < item.cantidad) {
-        addNotification(`Error: No hay suficiente stock de ${item.nombre}`, 'danger'); // <-- REEMPLAZO
+        addNotification(`Error: No hay suficiente stock de ${item.nombre}`, 'danger');
         return false;
       }
     }
 
     const nuevoPedido: Pedido = {
-      id: Date.now(),
+      id: Date.now(), // ID temporal para UI
       fecha: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
       productos: [...carrito],
@@ -125,15 +131,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
       estado: 'Pendiente'
     };
 
-    carrito.forEach(item => {
-      reducirStock(item.id, item.cantidad);
-    });
+    // 2. Llamada al Backend (esperamos respuesta)
+    const exito = await agregarPedido(nuevoPedido); // <--- AWAIT
 
-    agregarPedido(nuevoPedido);
-    setCarrito([]);
-    localStorage.removeItem('carritoInvitado');
+    if (exito) {
+        // 3. Si el backend responde OK:
+        // Descontamos stock visualmente
+        carrito.forEach(item => {
+          reducirStock(item.id, item.cantidad);
+        });
 
-    return true;
+        // Vaciamos carrito
+        vaciarCarrito();
+        localStorage.removeItem('carritoInvitado');
+        return true;
+    } else {
+        // 4. Si el backend falla
+        addNotification("Error al procesar el pedido. Intenta nuevamente.", 'danger'); 
+        return false;
+    }
   };
 
   const value = {

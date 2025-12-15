@@ -1,183 +1,239 @@
-// src/pages/Perfil.tsx
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
-import { useNotification } from '../context/NotificationContext'; // <-- IMPORTAR
+import { useState, useEffect } from 'react';
+import { useAuth, type Pedido } from '../context/AuthContext';
+import { Navigate, Link } from 'react-router-dom';
+import { useNotification } from '../context/NotificationContext';
 
 export function Perfil() {
-  const { usuarioActual, logout, actualizarDatosUsuario } = useAuth();
-  const { addNotification } = useNotification(); // <-- OBTENER HOOK
-  const [isEditing, setIsEditing] = useState(false);
+  const { usuarioActual, actualizarDatosUsuario, getAllPedidos } = useAuth();
+  const { addNotification } = useNotification();
+  
+  const [misPedidos, setMisPedidos] = useState<Pedido[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [modoEdicion, setModoEdicion] = useState(false);
   
   const [formData, setFormData] = useState({
-    nombre: usuarioActual?.nombre || '',
-    telefono: usuarioActual?.telefono || '',
-    direccion: usuarioActual?.direccion || '',
+    nombre: '',
+    telefono: '',
+    direccion: ''
   });
 
-  if (!usuarioActual) {
-    return <Navigate to="/login" replace />;
-  }
+  // 1. Cargar datos al iniciar
+  useEffect(() => {
+    if (usuarioActual) {
+      setFormData({
+        nombre: usuarioActual.nombre || '', 
+        telefono: usuarioActual.telefono || '',
+        direccion: usuarioActual.direccion || ''
+      });
+      cargarMisPedidos();
+    }
+  }, [usuarioActual]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const exito = actualizarDatosUsuario(formData);
-    if (exito) {
-      setIsEditing(false);
-      addNotification("Perfil actualizado con éxito", 'success'); // <-- NOTIFICACIÓN
-    } else {
-      addNotification("Error al actualizar el perfil", 'danger');
+  const cargarMisPedidos = async () => {
+    if (!usuarioActual) return;
+    try {
+      const todos = await getAllPedidos();
+      const nombreActual = usuarioActual.nombre || '';
+      
+      const filtrados = todos.filter(p => 
+          (p.clienteNombre && p.clienteNombre === nombreActual) || 
+          (p.clienteEmail === usuarioActual.username)
+      );
+      // El reverse() asegura que el último pedido (ID más alto) quede primero (índice 0)
+      setMisPedidos(filtrados.reverse());
+    } catch (error) {
+      console.error("Error cargando pedidos", error);
+    } finally {
+      setCargando(false);
     }
   };
 
+  const handleGuardarDatos = (e: React.FormEvent) => {
+    e.preventDefault();
+    const exito = actualizarDatosUsuario(formData);
+    if (exito) {
+      addNotification('Datos actualizados correctamente', 'success');
+      setModoEdicion(false);
+    } else {
+      addNotification('Error al actualizar perfil', 'danger');
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const getBadgeColor = (estado: string) => {
+    switch (estado) {
+      case 'Pendiente': return 'bg-secondary';
+      case 'Procesando': return 'bg-primary';
+      case 'Enviado': return 'bg-warning text-dark';
+      case 'Entregado': return 'bg-success';
+      case 'Cancelado': return 'bg-danger';
+      default: return 'bg-light text-dark';
+    }
+  };
+
+  if (!usuarioActual) return <Navigate to="/login" replace />;
+
+  const nombreMostrar = usuarioActual.nombre || 'Usuario';
+  const inicial = nombreMostrar.charAt(0).toUpperCase();
+  const primerNombre = nombreMostrar.split(' ')[0];
+
   return (
-    <main className="container my-5">
-      <h1 className="mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Mi Perfil</h1>
-      
-      <div className="row g-4">
-        {/* Tarjeta de Datos Personales */}
-        <div className="col-md-4">
-          <div className="card shadow-sm border-0 h-100">
-            <div className="card-header bg-success text-white py-3">
-              <h5 className="mb-0">Mis Datos Personales</h5>
-            </div>
-            
-            {!isEditing ? (
-              // --- VISTA DE SOLO LECTURA ---
-              <div className="card-body">
-                <div className="mb-3">
-                  <label className="small text-muted">Nombre completo</label>
-                  <p className="fw-medium fs-5">{usuarioActual.nombre}</p>
-                </div>
-                <div className="mb-3">
-                  <label className="small text-muted">Correo electrónico</label>
-                  <p className="fw-medium">{usuarioActual.correo}</p>
-                </div>
-                <div className="mb-3">
-                  <label className="small text-muted">Teléfono</label>
-                  <p>{usuarioActual.telefono || <em className="text-muted">No especificado</em>}</p>
-                </div>
-                <div className="mb-4">
-                  <label className="small text-muted">Dirección de envío</label>
-                  <p>{usuarioActual.direccion || <em className="text-muted">No especificada</em>}</p>
-                </div>
-                
-                <div className="d-grid gap-2">
-                  <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
-                    Editar Perfil
-                  </button>
-                  <button className="btn btn-outline-danger" onClick={logout}>
-                    Cerrar Sesión
-                  </button>
-                </div>
-              </div>
-
-            ) : (
-              // --- VISTA DE EDICIÓN ---
-              <div className="card-body">
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label className="form-label">Nombre completo</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      name="nombre"
-                      value={formData.nombre}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Correo electrónico</label>
-                    <input 
-                      type="email" 
-                      className="form-control" 
-                      value={usuarioActual.correo}
-                      disabled
-                      readOnly
-                    />
-                    <div className="form-text">El correo no se puede modificar.</div>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Teléfono</label>
-                    <input 
-                      type="tel" 
-                      className="form-control" 
-                      name="telefono"
-                      value={formData.telefono}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="form-label">Dirección de envío</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      name="direccion"
-                      value={formData.direccion}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="d-grid gap-2">
-                    <button type="submit" className="btn btn-success">Guardar Cambios</button>
-                    <button type="button" className="btn btn-secondary" onClick={() => setIsEditing(false)}>Cancelar</button>
-                  </div>
-                </form>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Tarjeta de Historial de Pedidos */}
-        <div className="col-md-8">
-          <div className="card shadow-sm border-0 h-100">
-            <div className="card-header bg-dark text-white py-3">
-              <h5 className="mb-0">Historial de Pedidos</h5>
-            </div>
-            <div className="card-body p-0">
-              {usuarioActual.pedidos && usuarioActual.pedidos.length > 0 ? (
-                <div className="list-group list-group-flush">
-                  {usuarioActual.pedidos.map((pedido) => (
-                    <div key={pedido.id} className="list-group-item p-4">
-                      <div className="d-flex w-100 justify-content-between align-items-center mb-3">
-                        <h6 className="mb-1 fw-bold">Pedido #{pedido.id}</h6>
-                        <small className={`badge ${pedido.estado === 'Entregado' ? 'bg-success' : 'bg-warning text-dark'}`}>
-                          {pedido.estado}
-                        </small>
-                      </div>
-                      <p className="mb-2 text-muted small">
-                        Realizado el {pedido.fecha} a las {pedido.hora}
-                      </p>
-                      <ul className="mb-3 ps-3">
-                        {pedido.productos.map((prod, idx) => (
-                            <li key={idx} className="small">
-                              {prod.cantidad}x {prod.nombre} - ${(prod.precio * prod.cantidad).toLocaleString('es-CL')}
-                            </li>
-                        ))}
-                      </ul>
-                      <h5 className="text-end text-success mb-0">
-                        Total: ${pedido.total.toLocaleString('es-CL')}
-                      </h5>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center p-5">
-                  <p className="text-muted mb-3 fs-5">Aún no has realizado ningún pedido.</p>
-                  <a href="/catalogo" className="btn btn-success">Ir a comprar</a>
-                </div>
-              )}
-            </div>
-          </div>
+    <div className="container py-5" style={{position: 'relative', zIndex: 10}}>
+      {/* CABECERA SIMPLIFICADA (Sin botones redundantes) */}
+      <div className="row mb-5 align-items-center">
+        <div className="col-12 text-white text-shadow"> {/* Texto blanco con sombra para que se lea sobre la fruta */}
+          <h1 className="display-4 fw-bold" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.7)' }}>
+            Hola, {primerNombre}
+          </h1>
+          <p className="lead" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.7)' }}>
+            Bienvenido a tu panel personal
+          </p>
         </div>
       </div>
-    </main>
+
+      <div className="row g-5">
+        
+        {/* COLUMNA IZQUIERDA: DATOS PERSONALES */}
+        <div className="col-lg-4">
+          <div className="card shadow border-0 rounded-4 overflow-hidden">
+            <div className="card-header bg-dark text-white p-4 text-center">
+              <div className="rounded-circle bg-white text-dark d-inline-flex align-items-center justify-content-center mb-3 fw-bold fs-2" 
+                   style={{width: '80px', height: '80px'}}>
+                  {inicial}
+              </div>
+              <h5 className="mb-0">{nombreMostrar}</h5>
+              <small className="opacity-75">{usuarioActual.correo || usuarioActual.username}</small>
+            </div>
+            
+            <div className="card-body p-4">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h6 className="fw-bold text-uppercase text-muted small mb-0">Información Personal</h6>
+                {!modoEdicion && (
+                  <button onClick={() => setModoEdicion(true)} className="btn btn-sm btn-link text-decoration-none">
+                    Editar
+                  </button>
+                )}
+              </div>
+
+              <form onSubmit={handleGuardarDatos}>
+                <div className="mb-3">
+                  <label className="form-label small text-muted">Nombre Completo</label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    className={`form-control ${!modoEdicion ? 'form-control-plaintext ps-0 fw-bold' : ''}`}
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    disabled={!modoEdicion}
+                    placeholder="Ingresa tu nombre"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label small text-muted">Teléfono de Contacto</label>
+                  <input
+                    type="tel"
+                    name="telefono"
+                    className={`form-control ${!modoEdicion ? 'form-control-plaintext ps-0 fw-bold' : ''}`}
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    disabled={!modoEdicion}
+                    placeholder={modoEdicion ? "+56 9 ..." : "Sin registrar"}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label small text-muted">Dirección de Envío</label>
+                  <input
+                    type="text"
+                    name="direccion"
+                    className={`form-control ${!modoEdicion ? 'form-control-plaintext ps-0 fw-bold' : ''}`}
+                    value={formData.direccion}
+                    onChange={handleChange}
+                    disabled={!modoEdicion}
+                    placeholder={modoEdicion ? "Calle Principal #123..." : "Sin registrar"}
+                  />
+                </div>
+
+                {modoEdicion && (
+                  <div className="d-grid gap-2 mt-4">
+                    <button type="submit" className="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" onClick={() => setModoEdicion(false)} className="btn btn-light text-muted">Cancelar</button>
+                  </div>
+                )}
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {/* COLUMNA DERECHA: HISTORIAL DE PEDIDOS */}
+        <div className="col-lg-8">
+            {/* Título con fondo blanco semitransparente para legibilidad */}
+          <div className="bg-white p-3 rounded-4 shadow-sm mb-4 d-inline-block">
+             <h4 className="mb-0 text-dark" style={{ fontFamily: "'Playfair Display', serif" }}>Historial de Pedidos</h4>
+          </div>
+          
+          {cargando ? (
+             <div className="text-center py-5 card rounded-4"><div className="spinner-border text-primary mx-auto my-3"></div></div>
+          ) : misPedidos.length === 0 ? (
+            <div className="card shadow-sm border-0 p-5 text-center bg-white rounded-4">
+              <h2 className="display-1 text-muted mb-3">🛍️</h2>
+              <h5>Aún no tienes pedidos</h5>
+              <p className="text-muted mb-4">¡Explora nuestra tienda y disfruta de frutas frescas!</p>
+              <div>
+                <Link to="/catalogo" className="btn btn-primary px-4 rounded-pill">Ir al Catálogo</Link>
+              </div>
+            </div>
+          ) : (
+            <div className="d-flex flex-column gap-3">
+              {misPedidos.map((pedido, index) => (
+                <div key={pedido.id} className={`card border-0 shadow-sm rounded-4 overflow-hidden ${index === 0 ? 'border border-2 border-primary' : ''}`}>
+                  <div className={`card-header py-3 d-flex justify-content-between align-items-center ${index === 0 ? 'bg-primary text-white' : 'bg-white'}`}>
+                     <div>
+                        <span className="fw-bold me-2">Pedido #{pedido.id}</span>
+                        <span className={`small ${index === 0 ? 'text-white-50' : 'text-muted'}`}>
+                            {pedido.fecha} a las {pedido.hora}
+                        </span>
+                        {/* ETIQUETA PARA EL ÚLTIMO PEDIDO */}
+                        {index === 0 && <span className="badge bg-white text-primary ms-2">⭐ Más Reciente</span>}
+                     </div>
+                     <span className={`badge ${getBadgeColor(pedido.estado)} px-3 py-2 rounded-pill border border-light`}>
+                       {pedido.estado}
+                     </span>
+                  </div>
+                  <div className="card-body">
+                    <div className="table-responsive mb-3">
+                      <table className="table table-sm table-borderless mb-0">
+                        <thead className="text-muted border-bottom">
+                          <tr>
+                            <th>Producto</th>
+                            <th className="text-center">Cant.</th>
+                            <th className="text-end">Precio</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pedido.productos.map((prod, idx) => (
+                            <tr key={`${pedido.id}-${idx}`}>
+                              <td>{prod.nombre}</td>
+                              <td className="text-center">x{prod.cantidad}</td>
+                              <td className="text-end text-muted">${(prod.precio * prod.cantidad).toLocaleString('es-CL')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center border-top pt-3">
+                       <small className="text-muted">Total pagado</small>
+                       <h5 className="mb-0 fw-bold text-success">${pedido.total.toLocaleString('es-CL')}</h5>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

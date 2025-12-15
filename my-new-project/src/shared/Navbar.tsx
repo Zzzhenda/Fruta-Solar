@@ -6,15 +6,10 @@ import { useCart } from '../context/CartContext';
 export function Navbar() {
   const { usuarioActual, logout } = useAuth();
   const { totalItems } = useCart();
-  
-  // 1. Obtenemos la ubicación actual
   const location = useLocation();
-  
-  // 2. Comprobamos si estamos en la página de inicio (ruta "/")
   const esHomepage = location.pathname === '/';
 
   return (
-    // 3. Aplicamos la clase 'header-transparente' SÓLO si esHomepage es true
     <header className={esHomepage ? 'header-transparente' : ''}>
       <nav className="navbar navbar-expand-lg">
         <div className="container-fluid px-4">
@@ -25,72 +20,45 @@ export function Navbar() {
           </Link>
 
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            {/* 4. Hacemos el ícono visible (blanco) en el Home, y por defecto en el resto */}
-            <span 
-              className="navbar-toggler-icon" 
-              style={{ filter: esHomepage ? 'brightness(0) invert(1)' : 'none' }}
-            ></span>
+            <span className="navbar-toggler-icon" style={{ filter: esHomepage ? 'brightness(0) invert(1)' : 'none' }}></span>
           </button>
 
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item me-3">
-                <NavLink className="nav-link btn btn-success text-white" to="/impacto">Impacto</NavLink>
-              </li>
-              <li className="nav-item me-3">
-                <NavLink className="nav-link btn btn-success text-white" to="/catalogo">Catálogo</NavLink>
-              </li>
-               <li className="nav-item">
-                <NavLink className="nav-link btn btn-success text-white" to="/contacto">Contacto</NavLink>
-              </li>
+              <li className="nav-item me-3"><NavLink className="nav-link btn btn-success text-white" to="/impacto">Impacto</NavLink></li>
+              <li className="nav-item me-3"><NavLink className="nav-link btn btn-success text-white" to="/catalogo">Catálogo</NavLink></li>
+              <li className="nav-item"><NavLink className="nav-link btn btn-success text-white" to="/contacto">Contacto</NavLink></li>
             </ul>
 
-            {/* Lógica completa de Auth y Carrito */}
             <ul className="navbar-nav d-flex flex-row align-items-center">
               <li className="nav-item me-3">
                 <Link className="nav-link btn btn-success text-white position-relative" to="/carrito">
                   Carrito
-                  {totalItems > 0 && (
-                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                      {totalItems}
-                    </span>
-                  )}
+                  {totalItems > 0 && <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{totalItems}</span>}
                 </Link>
               </li>
 
               {usuarioActual ? (
                 <>
                   <li className="nav-item me-3">
-                    <Link className="nav-link btn btn-success text-white" to="/perfil">
-                      Hola, {usuarioActual.nombre}
-                    </Link>
+                    <Link className="nav-link btn btn-success text-white" to="/perfil">Hola, {usuarioActual.nombre}</Link>
                   </li>
-
+                  
+                  {/* ESTA ES LA PARTE QUE AHORA FUNCIONARÁ */}
                   {usuarioActual.rol === 'administrador' && (
                     <li className="nav-item me-3">
-                      <Link className="nav-link btn btn-warning text-dark fw-bold" to="/admin">
-                        Panel Admin
-                      </Link>
+                      <Link className="nav-link btn btn-warning text-dark fw-bold" to="/admin">Panel Admin</Link>
                     </li>
                   )}
 
                   <li className="nav-item">
-                    <button
-                      className="nav-link btn btn-danger text-white"
-                      onClick={logout}
-                    >
-                      Cerrar Sesión
-                    </button>
+                    <button className="nav-link btn btn-danger text-white" onClick={logout}>Cerrar Sesión</button>
                   </li>
                 </>
               ) : (
                 <>
-                  <li className="nav-item me-3">
-                    <Link className="nav-link btn btn-success text-white" to="/login">Login</Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link className="nav-link btn btn-success text-white" to="/registro">Registro</Link>
-                  </li>
+                  <li className="nav-item me-3"><Link className="nav-link btn btn-success text-white" to="/login">Login</Link></li>
+                  <li className="nav-item"><Link className="nav-link btn btn-success text-white" to="/registro">Registro</Link></li>
                 </>
               )}
             </ul>

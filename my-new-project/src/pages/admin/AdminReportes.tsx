@@ -1,31 +1,55 @@
-// src/pages/admin/AdminReportes.tsx
-import { useMemo } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useMemo, useState, useEffect } from 'react'; // Agregamos useState y useEffect
+import { useAuth, type Pedido, type Usuario } from '../../context/AuthContext';
 import { useProducts } from '../../context/ProductContext';
 import { Navigate, Link } from 'react-router-dom';
 
 export function AdminReportes() {
   const { usuarioActual, getAllPedidos, getAllUsuarios } = useAuth();
-  const { productos } = useProducts();
+  // Eliminamos useProducts si no se usa directamente, aunque lo dejé por si acaso.
+  const { productos } = useProducts(); 
+
+  // --- ESTADO LOCAL PARA DATOS ASÍNCRONOS ---
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [cargando, setCargando] = useState(true);
 
   // Protección de ruta
   if (!usuarioActual || usuarioActual.rol !== 'administrador') {
     return <Navigate to="/" replace />;
   }
 
-  // --- CÁLCULOS DE INTELIGENCIA DE NEGOCIO (BI) ---
-  // Usamos useMemo para que estos cálculos pesados solo se ejecuten cuando cambien los datos,
-  // no en cada renderizado simple.
+  // --- CARGA DE DATOS (EFECTO) ---
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        // Usamos Promise.all para cargar ambos en paralelo (más rápido)
+        const [pedidosData, usuariosData] = await Promise.all([
+          getAllPedidos(),
+          getAllUsuarios()
+        ]);
+        
+        setPedidos(pedidosData);
+        setUsuarios(usuariosData);
+      } catch (error) {
+        console.error("Error cargando reportes:", error);
+      } finally {
+        setCargando(false);
+      }
+    };
 
+    cargarDatos();
+  }, []); // Se ejecuta solo al montar el componente
+
+  // --- CÁLCULOS DE BI (AHORA USAN EL ESTADO) ---
+  
   const kpis = useMemo(() => {
-    const pedidos = getAllPedidos();
-    const usuarios = getAllUsuarios();
-
+    // Ya no llamamos a getAllPedidos(), usamos la variable de estado 'pedidos'
+    
     // Filtramos solo pedidos válidos (no cancelados) para los ingresos
     const pedidosValidos = pedidos.filter(p => p.estado !== 'Cancelado');
     const ingresosTotales = pedidosValidos.reduce((sum, p) => sum + p.total, 0);
     
-    // Ticket promedio (cuánto gasta un cliente en promedio por compra)
+    // Ticket promedio
     const ticketPromedio = pedidosValidos.length > 0 ? Math.round(ingresosTotales / pedidosValidos.length) : 0;
 
     return {
@@ -35,30 +59,30 @@ export function AdminReportes() {
       totalClientes: usuarios.filter(u => u.rol === 'cliente').length,
       ticketPromedio
     };
-  }, [getAllPedidos, getAllUsuarios]);
+  }, [pedidos, usuarios]); // Dependencias: estado local
 
   const ventasPorProducto = useMemo(() => {
-    const pedidos = getAllPedidos();
     const contador: Record<string, { nombre: string; cantidad: number; ingresos: number }> = {};
 
     pedidos.forEach(pedido => {
-      if (pedido.estado !== 'Cancelado') { // Solo contamos ventas reales
+      if (pedido.estado !== 'Cancelado') { 
         pedido.productos.forEach(prod => {
-          if (!contador[prod.id]) {
-            contador[prod.id] = { nombre: prod.nombre, cantidad: 0, ingresos: 0 };
+          // Aseguramos que prod.id sea string para la clave
+          const idStr = String(prod.id);
+          
+          if (!contador[idStr]) {
+            contador[idStr] = { nombre: prod.nombre, cantidad: 0, ingresos: 0 };
           }
-          contador[prod.id].cantidad += prod.cantidad;
-          contador[prod.id].ingresos += prod.precio * prod.cantidad;
+          contador[idStr].cantidad += prod.cantidad;
+          contador[idStr].ingresos += prod.precio * prod.cantidad;
         });
       }
     });
 
-    // Convertimos el objeto a array y ordenamos por cantidad vendida (descendente)
     return Object.values(contador).sort((a, b) => b.cantidad - a.cantidad);
-  }, [getAllPedidos]);
+  }, [pedidos]);
 
   const estadoPedidos = useMemo(() => {
-    const pedidos = getAllPedidos();
     const total = pedidos.length;
     if (total === 0) return [];
 
@@ -72,9 +96,8 @@ export function AdminReportes() {
       count,
       porcentaje: Math.round((count / total) * 100)
     }));
-  }, [getAllPedidos]);
+  }, [pedidos]);
 
-  // Función auxiliar para colores de estado
   const getColorEstado = (estado: string) => {
     switch(estado) {
         case 'Pendiente': return 'secondary';
@@ -86,6 +109,10 @@ export function AdminReportes() {
     }
   };
 
+  if (cargando) {
+      return <div className="p-5 text-center"><h3>Cargando Reportes...</h3></div>;
+  }
+
   return (
     <main className="container-fluid px-4 my-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -95,7 +122,7 @@ export function AdminReportes() {
         </Link>
       </div>
 
-      {/* SECCIÓN 1: KPIs (Tarjetas Superiores) */}
+      {/* SECCIÓN 1: KPIs */}
       <div className="row g-4 mb-5">
         <div className="col-md-6 col-xl-3">
           <div className="card bg-success text-white h-100 shadow-sm">
@@ -137,7 +164,7 @@ export function AdminReportes() {
       </div>
 
       <div className="row g-4">
-        {/* SECCIÓN 2: ESTADO DE PEDIDOS (Gráfico de Barras) */}
+        {/* SECCIÓN 2: ESTADO DE PEDIDOS */}
         <div className="col-lg-5">
           <div className="card shadow-sm h-100 border-0">
             <div className="card-header bg-transparent py-3">

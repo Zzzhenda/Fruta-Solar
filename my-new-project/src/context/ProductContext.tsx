@@ -1,7 +1,6 @@
-// src/context/ProductContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { Producto } from '../data/productos';
-import api from '../api/axiosConfig'; // Usamos la configuración real
+import api from '../api/axiosConfig';
 import { useNotification } from './NotificationContext';
 
 interface ProductContextType {
@@ -11,6 +10,7 @@ interface ProductContextType {
   agregarProducto: (producto: Producto) => Promise<void>;
   editarProducto: (productoActualizado: Producto) => Promise<void>;
   eliminarProducto: (id: string) => Promise<void>;
+  recargarProductos: () => Promise<void>; // <--- NUEVO: Expuesto para uso global
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -23,16 +23,16 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const fetchProductos = async () => {
     try {
       const response = await api.get('/frutas');
-      // Adaptamos los datos: El backend Java puede devolver ID numérico, el front usa string
       const productosAdaptados = response.data.map((p: any) => ({
         ...p,
         id: p.id.toString(),
-        imagen: p.imagen && p.imagen.length > 5 ? p.imagen : "/images/manzana.png"
+        // Si la imagen viene vacía, ponemos un placeholder
+        imagen: p.imagen && p.imagen.length > 5 ? p.imagen : "https://via.placeholder.com/150?text=Sin+Imagen"
       }));
       setProductos(productosAdaptados);
     } catch (error) {
       console.error("Error conectando con el Backend:", error);
-      addNotification("Error al cargar productos del servidor", "danger");
+      // No mostramos notificación de error constante para no molestar al usuario
     }
   };
 
@@ -43,19 +43,15 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
   const getProductoById = (id: string) => productos.find(p => p.id === id);
 
-  // --- CRUD REAL: INTEGRACIÓN CON BACKEND ---
-
   const agregarProducto = async (producto: Producto) => {
     try {
-      // Omitimos el ID porque la base de datos lo genera
       const { id, ...productoSinId } = producto;
       await api.post('/frutas', productoSinId);
-      
-      await fetchProductos(); // Recargamos la lista desde el servidor
+      await fetchProductos();
       addNotification("Producto creado exitosamente", "success");
     } catch (error) {
       console.error(error);
-      addNotification("Error al crear producto (Verifica permisos de Admin)", "danger");
+      addNotification("Error al crear producto", "danger");
     }
   };
 
@@ -81,7 +77,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const reducirStock = () => { /* Lógica opcional de stock local */ };
+  const reducirStock = () => { /* El backend maneja el stock real ahora */ };
 
   const value = {
     productos,
@@ -89,7 +85,8 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     reducirStock,
     agregarProducto,
     editarProducto,
-    eliminarProducto
+    eliminarProducto,
+    recargarProductos: fetchProductos // <--- Exponemos la función
   };
 
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;

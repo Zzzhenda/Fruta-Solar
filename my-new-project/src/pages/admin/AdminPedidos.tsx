@@ -4,7 +4,7 @@ import { useAuth, type Pedido } from '../../context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
 import { useNotification } from '../../context/NotificationContext';
 
-// Definimos un tipo extendido para incluir datos del cliente en la vista
+// Definimos un tipo extendido para la vista
 interface PedidoExtendido extends Pedido {
   clienteNombre: string;
   clienteEmail: string;
@@ -26,14 +26,28 @@ export function AdminPedidos() {
   // Cargar pedidos al montar el componente
   useEffect(() => {
     refrescarPedidos();
-  }, []); // Solo al cargar
+  }, []); 
 
-  const refrescarPedidos = () => {
-    setPedidos(getAllPedidos());
+  // --- AQUÍ ESTÁ EL ARREGLO ---
+  const refrescarPedidos = async () => {
+    const datos = await getAllPedidos();
+    
+    // Transformamos los datos para asegurar que cumplan con PedidoExtendido
+    // Usamos '??' para poner un valor por defecto si viene undefined
+    const datosSeguros: PedidoExtendido[] = datos.map((p) => ({
+      ...p,
+      clienteNombre: p.clienteNombre ?? 'Cliente Desconocido',
+      clienteEmail: p.clienteEmail ?? 'Sin Email',
+      fecha: p.fecha ?? '',
+      hora: p.hora ?? ''
+    }));
+
+    setPedidos(datosSeguros);
   };
+  // -----------------------------
 
-  const handleCambioEstado = (pedidoId: number, nuevoEstado: string) => {
-    actualizarEstadoPedido(pedidoId, nuevoEstado);
+  const handleCambioEstado = async (pedidoId: number, nuevoEstado: string) => {
+    await actualizarEstadoPedido(pedidoId, nuevoEstado);
     refrescarPedidos(); // Recargamos la lista para ver el cambio
     addNotification(`Pedido #${pedidoId} actualizado a "${nuevoEstado}"`, 'success');
   };
@@ -83,8 +97,6 @@ export function AdminPedidos() {
       </div>
 
      {/* Tabla de Pedidos */}
-      
-      {/* ¡ARREGLO AQUÍ! Se añadió 'admin-table-card' para el fix de CSS */}
       <div className="card shadow-sm border-0 admin-table-card">
         <div className="card-body p-0">
           <table className="table table-hover align-middle mb-0">
@@ -119,7 +131,6 @@ export function AdminPedidos() {
                     </span>
                   </td>
                   <td>
-                    {/* Este dropdown ahora se verá completo */}
                     <div className="dropdown">
                       <button className="btn btn-sm btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Gestionar

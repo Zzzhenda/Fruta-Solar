@@ -26,7 +26,7 @@ export function AdminProductos() {
   const [editando, setEditando] = useState(false);
   const [form, setForm] = useState<Producto>(initialFormState);
   
-  if (!usuarioActual || usuarioActual.rol !== 'administrador') {
+  if (!usuarioActual || (usuarioActual as any).rol !== 'administrador') {
     return <Navigate to="/" replace />;
   }
 
